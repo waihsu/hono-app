@@ -52,4 +52,4 @@ RUN cd /frontend && bun run build
 # run the app
 USER bun
 EXPOSE 4000/tcp
-ENTRYPOINT [ "bun", "run", "index.ts" ]
+ENTRYPOINT [ "bun", "run", "src/index.ts" ]
