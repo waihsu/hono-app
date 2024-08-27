@@ -15,41 +15,43 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:1 as base
-WORKDIR /usr/src/app
+# Bun app lives here
+WORKDIR /app
 
-# install dependencies into temp directory
-# this will cache them and speed up future builds
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json bun.lockb /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+# Set production environment
+ENV NODE_ENV="production"
 
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lockb /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
-COPY . .
+# Throw-away build stage to reduce size of final image
+FROM base as build
 
-# [optional] tests & build
-# ENV NODE_ENV=production
-# RUN bun test
-# RUN bun run build
+# Install packages needed to build node modules
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
-RUN cd /frontend && bun install
-RUN cd /frontend && bun run build
+# Install node modules
+COPY --link bun.lockb package.json ./
+RUN bun install --ci
 
-# # # copy production dependencies and source code into final image
-# FROM base AS release
-# COPY --from=install /temp/prod/node_modules node_modules
-# COPY --from=prerelease /usr/src/app/index.ts .
-# COPY --from=prerelease /usr/src/app/package.json .
+# Install frontend node modules
+COPY --link frontend/bun.lockb frontend/package.json ./frontend/
+RUN cd frontend && bun install --ci
 
-# run the app
-USER bun
-EXPOSE 4000/tcp
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+# Copy application code
+COPY --link . .
+
+# Change to frontend directory and build the frontend app
+WORKDIR /app/frontend
+RUN bun run build
+# Remove all files in frontend except for the dist folder
+RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
+
+# Final stage for app image
+FROM base
+
+# Copy built application
+COPY --from=build /app /app
+
+# Start the server by default, this can be overwritten at runtime
+EXPOSE 3000
+CMD [ "bun", "run", "dev" ]
