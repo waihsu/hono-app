@@ -44,7 +44,7 @@ COPY --link . .
 
 # Change to frontend directory and build the frontend app
 WORKDIR /app/frontend
-RUN npm run build
+RUN bun run build
 # Remove all files in frontend except for the dist folder
 RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
@@ -56,4 +56,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "npm", "run", "dev" ]
+CMD [ "bun", "run", "dev" ]
