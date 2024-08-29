@@ -44,7 +44,7 @@ COPY --link . .
 
 # Change to frontend directory and build the frontend app
 WORKDIR /app/frontend
-RUN npm run build
+RUN npx vite build
 # Remove all files in frontend except for the dist folder
 RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
