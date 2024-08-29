@@ -31,6 +31,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link bun.lockb package.json ./
+COPY prisma ./prisma
 RUN npm install -g bun
 RUN npm install 
 RUN npx prisma generate
