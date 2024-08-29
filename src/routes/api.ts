@@ -22,8 +22,14 @@ api.get("/appData", async (c) => {
     const matches = await prisma.matches.findMany({
       orderBy: { created_at: "desc" },
     });
-    const bettingMarkets = await prisma.bettingMarkets.findMany();
-    return c.json({ leagues, countries, teams, matches, bettingMarkets });
+    const bettingMarkets = await prisma.bettingMarkets.findMany({
+      where: { is_archived: false },
+    });
+    const bettingMartketIds = bettingMarkets.map((item) => item.id);
+    const odds = await prisma.odds.findMany({
+      where: { betting_market_id: { in: bettingMartketIds } },
+    });
+    return c.json({ leagues, countries, teams, matches, bettingMarkets, odds });
   } catch (err) {
     return c.json({ messg: "Error" }, 405);
   }
