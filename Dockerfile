@@ -115,6 +115,16 @@ FROM node:18 as build
 # Set the working directory
 WORKDIR /app
 
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+WORKDIR /app/frontend
+RUN npm install
+
+# Install Rollup globally (if the error persists)
+# RUN npm install -g rollup
+
+# Build the frontend
+RUN npm run build
+
 # Copy the main package.json and install dependencies for the backend
 COPY package.json package-lock.json ./
 RUN npm install
@@ -123,15 +133,7 @@ RUN npm install
 COPY prisma ./prisma
 
 # Install frontend dependencies
-COPY frontend/package.json frontend/package-lock.json ./frontend/
-WORKDIR /app/frontend
-RUN npm install
 
-# Install Rollup globally (if the error persists)
-RUN npm install -g rollup
-
-# Build the frontend
-RUN npm run build
 
 # Copy the rest of the application code
 WORKDIR /app
