@@ -14,8 +14,7 @@
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-# FROM oven/bun:1 as base
-FROM node:18 as build
+FROM oven/bun:1 as base
 # Bun app lives here
 WORKDIR /app
 
