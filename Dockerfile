@@ -37,14 +37,14 @@ RUN npx prisma generate
 
 # Install frontend node modules
 COPY --link frontend/bun.lockb frontend/package.json ./frontend/
-RUN cd frontend && bun install --ci
+RUN cd frontend && npm install 
 
 # Copy application code
 COPY --link . .
 
 # Change to frontend directory and build the frontend app
 WORKDIR /app/frontend
-RUN bun run build
+RUN npm run build
 # Remove all files in frontend except for the dist folder
 RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
@@ -56,4 +56,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "bun", "run", "dev" ]
+CMD [ "npm", "run", "dev" ]
