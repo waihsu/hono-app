@@ -43,6 +43,7 @@ COPY --link frontend/bun.lockb frontend/package.json ./frontend/
 COPY --link . .
 
 # Change to frontend directory and build the frontend app
+COPY --link bun.lockb package.json ./
 WORKDIR /app/frontend
 RUN npm install 
 RUN npm run build
