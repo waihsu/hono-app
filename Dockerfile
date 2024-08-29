@@ -14,7 +14,8 @@
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 as base
+# FROM oven/bun:1 as base
+FROM node:18 as build
 # Bun app lives here
 WORKDIR /app
 
@@ -23,7 +24,7 @@ ENV NODE_ENV="production"
 
 
 # Throw-away build stage to reduce size of final image
-FROM base as build
+# FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
@@ -31,7 +32,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY --link bun.lockb package.json ./
-RUN npm install --ci
+RUN npm install 
 RUN npx prisma generate
 
 # Install frontend node modules
@@ -48,7 +49,7 @@ RUN bun run build
 RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
 # Final stage for app image
-FROM base
+FROM oven/bun:1 as runtime
 
 # Copy built application
 COPY --from=build /app /app
