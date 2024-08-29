@@ -14,7 +14,7 @@
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:latest as base
+FROM node:20-alpine3.20 as base
 # Bun app lives here
 WORKDIR /app
 
