@@ -14,7 +14,7 @@
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM node:18  as base
+FROM oven/bun:latest as base
 # Bun app lives here
 WORKDIR /app
 
@@ -32,9 +32,8 @@ RUN apt-get update -qq && \
 # Install node modules
 COPY --link bun.lockb package.json ./
 COPY prisma ./prisma
-RUN npm install -g bun
-RUN npm install 
-RUN npx prisma generate
+RUN bun install --ci
+RUN bunx prisma generate
 
 # Install frontend node modules
 COPY --link frontend/bun.lockb frontend/package.json ./frontend/
