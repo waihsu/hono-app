@@ -56,53 +56,99 @@
 # EXPOSE 3000
 # CMD [ "bun", "run", "dev" ]
 # Use the official Bun image as the base
-FROM oven/bun:1 as base
+# FROM oven/bun:1 as base
+
+# # Set the working directory
+# WORKDIR /app
+
+# # Set production environment
+# ENV NODE_ENV="production"
+
+# # Stage 1: Install dependencies and build the app
+# FROM base as build
+
+# # Install packages needed to build node modules
+# RUN apt-get update -qq && \
+#     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+
+# # Install node modules
+# COPY --link bun.lockb package.json ./
+# RUN bun install --ci
+
+# # Install frontend node modules
+# COPY --link frontend/bun.lockb frontend/package.json ./frontend/
+# RUN cd frontend && bun install --ci
+
+# # Copy the application code
+# COPY --link . .
+
+# # Generate Prisma client
+# RUN bun prisma generate
+
+# # Change to frontend directory and build the frontend app
+# WORKDIR /app/frontend
+# RUN bun run build
+
+# # Remove all files in frontend except for the dist folder
+# RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
+
+# # Stage 2: Create the final image
+# FROM base
+
+# # Copy the built application
+# COPY --from=build /app /app
+
+# # Expose the port
+# EXPOSE 3000
+
+# # Run database migrations
+# CMD ["bun", "run", "migrate", "deploy"]
+
+# # Start the server
+# CMD ["bun", "run", "dev"]
+
+
+
+# Stage 1: Use Node.js to build the application and handle Prisma
+FROM node:18 as build
 
 # Set the working directory
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+# Copy package files and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
 
-# Stage 1: Install dependencies and build the app
-FROM base as build
+# Install frontend dependencies
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+RUN cd frontend && npm install
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+# Copy the rest of the application code
+COPY . .
 
-# Install node modules
-COPY --link bun.lockb package.json ./
-RUN bun install --ci
+# Generate Prisma client and run migrations
+RUN npx prisma generate
+RUN npx prisma migrate deploy
 
-# Install frontend node modules
-COPY --link frontend/bun.lockb frontend/package.json ./frontend/
-RUN cd frontend && bun install --ci
-
-# Copy the application code
-COPY --link . .
-
-# Generate Prisma client
-RUN bun prisma generate
-
-# Change to frontend directory and build the frontend app
+# Build the frontend
 WORKDIR /app/frontend
-RUN bun run build
+RUN npm run build
 
-# Remove all files in frontend except for the dist folder
+# Remove unnecessary files to keep the image size small
 RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
-# Stage 2: Create the final image
-FROM base
+# Stage 2: Use Bun for the final runtime
+FROM oven/bun:1 as runtime
 
-# Copy the built application
+# Set the working directory
+WORKDIR /app
+
+# Copy the built application from the previous stage
 COPY --from=build /app /app
 
 # Expose the port
 EXPOSE 3000
 
-# Run database migrations
-CMD ["bun", "run", "migrate", "deploy"]
-
 # Start the server
 CMD ["bun", "run", "dev"]
+
