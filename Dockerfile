@@ -128,7 +128,7 @@ COPY . .
 
 # Generate Prisma client and run migrations
 RUN npx prisma generate
-RUN npx prisma migrate deploy
+# RUN npx prisma migrate deploy
 
 # Build the frontend
 WORKDIR /app/frontend
