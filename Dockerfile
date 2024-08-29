@@ -32,8 +32,8 @@ RUN apt-get update -qq && \
 # Install node modules
 COPY --link bun.lockb package.json ./
 COPY prisma ./prisma
-RUN bun install --ci
-RUN bunx prisma generate
+RUN npm install
+RUN npx prisma generate
 
 # Install frontend node modules
 COPY --link frontend/bun.lockb frontend/package.json ./frontend/
