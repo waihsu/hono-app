@@ -69,6 +69,8 @@ WORKDIR /app
 
 COPY frontend/package.json frontend/package-lock.json ./frontend/
 WORKDIR /app/frontend
+RUN rm -rf node_modules
+RUN rm -f package-lock.json
 RUN npm install
 RUN npm run build
 
