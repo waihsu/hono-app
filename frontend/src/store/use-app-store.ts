@@ -53,7 +53,10 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   getAppData: async () => {
-    const resp = await fetch("/api/appData");
+    const resp = await fetch("/api/appData", {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Bearer: "" },
+    });
     if (resp.ok) {
       const { leagues, countries, teams, matches, bettingMarkets, odds } =
         await resp.json();

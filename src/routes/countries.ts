@@ -7,16 +7,12 @@ const countries = new Hono();
 countries.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
-    console.log(token);
-    if (!token)
-      return Response.json({ messg: "Unauthorized" }, { status: 404 });
-    const secret = "mySecretKey";
-    const { role } = await verify(token, secret);
-    if (role === "USER")
-      return Response.json(
-        { messg: "Unauthorized You are not admin" },
-        { status: 404 }
-      );
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const { name }: { name: string } = await c.req.json();
     if (!name)
       return Response.json({ messg: "Form not valid" }, { status: 403 });
@@ -30,6 +26,13 @@ countries.post("/", async (c) => {
 
 countries.put("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const { id, name }: { id: string; name: string } = await c.req.json();
     const updatedCountry = await prisma.countries.update({
       where: { id },
@@ -44,6 +47,13 @@ countries.put("/:id", async (c) => {
 
 countries.delete("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const { id } = c.req.param();
     const deletedCountry = await prisma.countries.update({
       where: { id },

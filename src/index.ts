@@ -17,6 +17,6 @@ app.use("*", serveStatic({ root: "./frontend/dist" }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
 
 export default {
-  port: 4000,
+  port: 3000,
   fetch: app.fetch,
 };

@@ -8,16 +8,11 @@ const matches = new Hono();
 matches.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
-    console.log(token);
-    if (!token)
-      return Response.json({ messg: "Unauthorized" }, { status: 404 });
-    const secret = "mySecretKey";
-    const { role } = await verify(token, secret);
-    if (role === "USER")
-      return Response.json(
-        { messg: "Unauthorized You are not admin" },
-        { status: 404 }
-      );
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const {
       homeTeamId,
       awayTeamId,
@@ -45,6 +40,12 @@ matches.post("/", async (c) => {
 
 matches.put("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id } = c.req.param();
     const {
       homeTeamId,
@@ -75,6 +76,12 @@ matches.put("/:id", async (c) => {
 
 matches.delete("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id } = c.req.param();
     const deletedCountry = await prisma.matches.delete({
       where: { id },

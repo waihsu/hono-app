@@ -1,23 +1,36 @@
 import { Hono } from "hono";
 import { prisma } from "../../db/prisma";
+import { bearerAuth } from "hono/bearer-auth";
+import { jwt, verify } from "hono/jwt";
 
 const leagues = new Hono();
 
 leagues.post("/", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { name }: { name: string } = await c.req.json();
-    if (!name)
-      return Response.json({ messg: "Form not valid" }, { status: 403 });
+    if (!name) return c.json({ messg: "Form not valid" }, 403);
     const newLeague = await prisma.leagues.create({ data: { name } });
     return c.json({ newLeague });
   } catch (err) {
     console.log(err);
-    return Response.json({ messg: "Error" }, { status: 405 });
+    return c.json({ messg: "Error" }, 403);
   }
 });
 
 leagues.put("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id, name }: { id: string; name: string } = await c.req.json();
     const updatedLeague = await prisma.leagues.update({
       where: { id },
@@ -32,6 +45,12 @@ leagues.put("/:id", async (c) => {
 
 leagues.delete("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id } = c.req.param();
     const deletedLeague = await prisma.leagues.update({
       where: { id },

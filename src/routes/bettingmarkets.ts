@@ -8,12 +8,11 @@ const bettingMarkets = new Hono();
 bettingMarkets.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
-    console.log(token);
-    if (!token) return c.json({ messg: "Unauthorized" }, 403);
-    const secret = "mySecretKey";
-    const { role } = await verify(token, secret);
-    if (role === "USER")
-      return c.json({ messg: "Unauthorized You are not admin" }, 403);
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const {
       market_type,
       match_id,
@@ -35,6 +34,13 @@ bettingMarkets.post("/", async (c) => {
 
 bettingMarkets.put("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const {
       id,
       market_type,
@@ -59,6 +65,13 @@ bettingMarkets.put("/:id", async (c) => {
 
 bettingMarkets.delete("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const { id } = c.req.param();
     const deletedCountry = await prisma.bettingMarkets.update({
       where: { id },

@@ -7,16 +7,11 @@ const teams = new Hono();
 teams.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
-    console.log(token);
-    if (!token)
-      return Response.json({ messg: "Unauthorized" }, { status: 404 });
-    const secret = "mySecretKey";
-    const { role } = await verify(token, secret);
-    if (role === "USER")
-      return Response.json(
-        { messg: "Unauthorized You are not admin" },
-        { status: 404 }
-      );
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const {
       name,
       image_url,
@@ -42,6 +37,12 @@ teams.post("/", async (c) => {
 
 teams.put("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id, name }: { id: string; name: string } = await c.req.json();
     const updatedCountry = await prisma.teams.update({
       where: { id },
@@ -56,6 +57,12 @@ teams.put("/:id", async (c) => {
 
 teams.delete("/:id", async (c) => {
   try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const { id } = c.req.param();
     const deletedCountry = await prisma.teams.update({
       where: { id },

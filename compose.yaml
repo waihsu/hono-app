@@ -20,8 +20,9 @@ services:
       - storageBucket=grow-5aa4b.appspot.com
       - messagingSenderId=852976842507
       - appId=1:852976842507:web:e62665d0a853c6724dd40e
+      - JWT_SECRET=a6d0c8f9280f4b1db3ea1f0f39e5bf3ad5d2e6d718b58b60f6ff5e8e7a4c5d89
     ports:
-      - 4000:4000
+      - 3000:3000
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the

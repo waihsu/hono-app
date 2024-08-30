@@ -1,18 +1,16 @@
 import { Hono } from "hono";
-import { prettyJSON } from "hono/pretty-json";
 import { bodyLimit } from "hono/body-limit";
 import { prisma } from "../../db/prisma";
 import { sign } from "hono/jwt";
 import leagues from "./leagues";
 import countries from "./countries";
-
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../libs/firebase";
 import teams from "./teams";
 import matches from "./matches";
 import bettingMarkets from "./bettingmarkets";
 
-const api = new Hono().use(prettyJSON());
+const api = new Hono();
 
 api.get("/appData", async (c) => {
   try {
@@ -64,8 +62,8 @@ api.post("/login", async (c) => {
       role: existEmail.user_role,
       exp: Math.floor(Date.now() / 1000) + 60 * 500, // Token expires in 5 minutes
     };
-    const secret = "mySecretKey";
-    const token = await sign(payload, secret);
+
+    const token = await sign(payload, process.env.JWT_SECRET!);
     // console.log(token);
     const user = {
       id: existEmail.id,
