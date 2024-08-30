@@ -31,6 +31,7 @@ api.get("/appData", async (c) => {
     });
     return c.json({ leagues, countries, teams, matches, bettingMarkets, odds });
   } catch (err) {
+    console.log(err);
     return c.json({ messg: "Error" }, 405);
   }
 });

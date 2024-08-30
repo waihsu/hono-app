@@ -8,14 +8,20 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  web:
     build:
       context: .
     environment:
-      NODE_ENV: production
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://waihsu:VP3LAF9hWtrj@ep-winter-morning-13900613-pooler.ap-southeast-1.aws.neon.tech/football?sslmode=require
+      - apiKey=AIzaSyDm5AFqeLx57UlN4R8W9jeFNa5w70_vPks
+      - authDomain=grow-5aa4b.firebaseapp.com
+      - projectId=grow-5aa4b
+      - storageBucket=grow-5aa4b.appspot.com
+      - messagingSenderId=852976842507
+      - appId=1:852976842507:web:e62665d0a853c6724dd40e
     ports:
-      - 3000:3000
-
+      - 4000:4000
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the

@@ -9,6 +9,7 @@ FROM base as build
 # Install node modules
 COPY --link bun.lockb package.json ./
 COPY prisma ./prisma
+COPY .env .env
 RUN bun install 
 # RUN bun add @prisma/clien
 RUN bunx prisma generate
@@ -33,5 +34,5 @@ FROM base
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
+EXPOSE 4000
 CMD [ "bun", "run", "dev" ]
