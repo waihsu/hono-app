@@ -1,38 +1,37 @@
-# syntax=docker/dockerfile:1
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:latest AS base
+WORKDIR /app
+FROM base as build
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
+# install dependencies into temp directory
+# this will cache them and speed up future builds
+# Install node modules
+COPY --link bun.lockb package.json ./
+COPY prisma ./prisma
+RUN bun install 
+# RUN bun add @prisma/clien
+RUN bunx prisma generate
 
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+# Install frontend node modules
+COPY --link frontend/bun.lockb frontend/package.json ./frontend/
+RUN cd frontend && bun install
 
-ARG NODE_VERSION=22.5.1
+# Copy application code
+COPY --link . .
 
-FROM node:${NODE_VERSION}-alpine
+# Change to frontend directory and build the frontend app
+WORKDIR /app/frontend
+RUN bun run build
+# Remove all files in frontend except for the dist folder
+RUN find . -mindepth 1 ! -regex '^./dist\(/.*\)?' -delete
 
-# Use production node environment by default.
-ENV NODE_ENV production
+# Final stage for app image
+FROM base
 
+# Copy built application
+COPY --from=build /app /app
 
-WORKDIR /usr/src/app
-
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev
-
-# Run the application as a non-root user.
-USER node
-
-# Copy the rest of the source files into the image.
-COPY . .
-
-# Expose the port that the application listens on.
+# Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-
-# Run the application.
-CMD bun run dev
+CMD [ "bun", "run", "dev" ]
