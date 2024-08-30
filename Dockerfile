@@ -72,6 +72,7 @@ WORKDIR /app/frontend
 RUN rm -rf node_modules
 RUN rm -f package-lock.json
 RUN npm install
+RUN npm install -g rollup
 RUN npm run build
 
 # Copy the main package.json and install dependencies for the backend
