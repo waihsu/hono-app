@@ -62,13 +62,15 @@
 # Stage 1: Use Node.js to build the application and handle Prisma
 FROM node:18 as build
 
+
+
+# Set the working directory
+WORKDIR /app
+
 COPY frontend/package.json frontend/package-lock.json ./frontend/
 WORKDIR /app/frontend
 RUN npm install
 RUN npm run build
-
-# Set the working directory
-WORKDIR /app
 
 # Copy the main package.json and install dependencies for the backend
 COPY package.json package-lock.json ./
