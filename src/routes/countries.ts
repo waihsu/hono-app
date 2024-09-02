@@ -14,13 +14,12 @@ countries.post("/", async (c) => {
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
 
     const { name }: { name: string } = await c.req.json();
-    if (!name)
-      return Response.json({ messg: "Form not valid" }, { status: 403 });
+    if (!name) return c.json({ messg: "Form not valid" }, 403);
     const newCountry = await prisma.countries.create({ data: { name } });
     return c.json({ newCountry });
   } catch (err) {
     console.log(err);
-    return Response.json({ messg: "Error" }, { status: 405 });
+    return c.json({ messg: "Error" }, 405);
   }
 });
 
@@ -41,7 +40,7 @@ countries.put("/:id", async (c) => {
     return c.json({ updatedCountry });
   } catch (err) {
     console.log(err);
-    return Response.json({ messg: "Error" }, { status: 405 });
+    return c.json({ messg: "Error" }, 405);
   }
 });
 
@@ -62,7 +61,7 @@ countries.delete("/:id", async (c) => {
     return c.json({ deletedCountry });
   } catch (err) {
     console.log(err);
-    return Response.json({ messg: "Error" }, { status: 405 });
+    return c.json({ messg: "Error" }, 405);
   }
 });
 

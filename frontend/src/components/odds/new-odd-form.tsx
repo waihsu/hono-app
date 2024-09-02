@@ -21,7 +21,7 @@ import SelectCountryLeague from "../select-country-league";
 const formSchema = z.object({
   betting_market_id: z.string(),
   outcome: z.string(),
-  odd_value: z.number(),
+  odd_value: z.string(),
   team_id: z.string(),
 });
 
@@ -32,7 +32,7 @@ export default function NewOddForm({
   bettingMarketId: string;
   data: { id: string; name: string }[];
 }) {
-  const { addCountry } = useAppStore();
+  const { addOdd } = useAppStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState("");
@@ -42,7 +42,7 @@ export default function NewOddForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       betting_market_id: bettingMarketId,
-      odd_value: 0,
+      odd_value: "",
       outcome: "",
       team_id: selectedTeamId,
     },
@@ -67,9 +67,9 @@ export default function NewOddForm({
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { newCountry } = data;
-      console.log(newCountry);
-      addCountry(newCountry);
+      const { newOdd } = data;
+      console.log(newOdd);
+      addOdd(newOdd);
       toast({ title: "successful" });
     }
   }
@@ -97,7 +97,7 @@ export default function NewOddForm({
             <FormItem>
               <FormLabel>Value</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="e.g 1.5" {...field} />
+                <Input type="text" placeholder="e.g 1.5" {...field} />
               </FormControl>
 
               <FormMessage />

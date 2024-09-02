@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function TeamCard({
   name,
   image_url,
@@ -10,7 +8,7 @@ export default function TeamCard({
   return (
     <div className="bg-card border p-4 flex flex-col justify-center items-center gap-2 rounded-md">
       <div>{name}</div>
-      <div className="rounded-full overflow-hidden w-32 h-32 bg-blue-400">
+      <div className="rounded-full overflow-hidden w-32 h-32 ">
         <img src={image_url} alt="" className="w-full h-full object-center" />
       </div>
     </div>

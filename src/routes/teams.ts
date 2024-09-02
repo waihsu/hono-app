@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { prisma } from "../../db/prisma";
 import { verify } from "hono/jwt";
+import { ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../libs/firebase";
+import { uploadImage } from "../libs/uploadImage";
 
 const teams = new Hono();
 
@@ -12,19 +15,16 @@ teams.post("/", async (c) => {
 
     const { role } = await verify(token, process.env.JWT_SECRET!);
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
-    const {
-      name,
-      image_url,
-      country_id,
-      league_id,
-    }: {
-      name: string;
-      image_url: string;
-      country_id: string;
-      league_id: string;
-    } = await c.req.json();
-    if (!name || !image_url || !country_id || !league_id)
-      return Response.json({ messg: "Form not valid" }, { status: 403 });
+    const file = (await c.req.formData()).get("file");
+    const name = (await c.req.formData()).get("name") as string;
+    const country_id = (await c.req.formData()).get("countryId") as string;
+    const league_id = (await c.req.formData()).get("leagueId") as string;
+
+    if (!name || !country_id || !league_id)
+      return c.json({ messg: "Form not valid" }, 403);
+    const image_url = await uploadImage({ blob: file as Blob, name: name });
+    if (!image_url) return c.json({ messg: "Image Upload Error" }, 403);
+    // console.log(image_url, name, country_id, league_id);
     const newTeam = await prisma.teams.create({
       data: { name, image_url, country_id, league_id },
     });

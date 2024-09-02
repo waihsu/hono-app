@@ -1,4 +1,3 @@
-import React from "react";
 import BackofficeLayout from "../backoffice-layout";
 import Heading from "../Heading";
 import { Link } from "react-router-dom";
@@ -14,7 +13,7 @@ export default function NewTeam() {
         button={
           <Link
             className={cn(
-              buttonVariants({ variant: "outline" }),
+              buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
             to={`/backoffice/teams`}

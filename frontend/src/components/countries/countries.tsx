@@ -16,7 +16,7 @@ export default function Countries() {
         button={
           <Link
             className={cn(
-              buttonVariants({ variant: "outline" }),
+              buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
             to={`/backoffice/countries/new`}

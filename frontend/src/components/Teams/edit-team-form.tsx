@@ -1,16 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
@@ -19,47 +8,39 @@ import { useAppStore } from "@/store/use-app-store";
 import ReactFileDropZone from "../react-drop-zone";
 import SelectCountryLeague from "../select-country-league";
 import { Team } from "@/types/types";
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  image_url: z.string(),
-  country_id: z.string(),
-  league_id: z.string(),
-});
+import { Label } from "../ui/label";
 
 export default function EditTeamForm({ team }: { team: Team }) {
   const { addTeam, countries, leagues } = useAppStore();
   const { token } = useTokenStore();
-  const [uploadedImage, setUploadedImage] = useState(team.image_url);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [name, setName] = useState("");
   const [countryId, setCountryId] = useState(team.country_id);
   const [leagueId, setLeagueId] = useState(team.league_id);
   const [loading, setLoading] = useState(false);
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: team.name,
-      image_url: team.image_url,
-      country_id: team.country_id,
-      league_id: team.league_id,
-    },
-  });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    values.image_url = uploadedImage;
-    values.country_id = countryId;
-    values.league_id = leagueId;
+  async function onSubmit() {
+    if (!selectedFile) return;
+    if (!name || !countryId || !leagueId)
+      return toast({
+        title: `All fields must be fill. ${!name ? "name need" : ""} ${
+          !leagueId ? "league need" : ""
+        } ${!countryId ? "country need" : ""}`,
+        variant: "destructive",
+      });
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("name", name);
+    formData.append("countryId", countryId);
+    formData.append("leagueId", leagueId);
     setLoading(true);
     const resp = await fetch("/api/teams", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Bearer: token,
       },
-      body: JSON.stringify(values),
+      body: formData,
     });
     setLoading(false);
     const data = await resp.json();
@@ -76,51 +57,48 @@ export default function EditTeamForm({ team }: { team: Team }) {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <div>
+      <div className="space-y-8">
         {/* Countries */}
         <div>
+          <Label>Countries</Label>
           <SelectCountryLeague
+            value={countryId}
             data={countries}
             name="Countries"
             setValue={setCountryId}
-            value={team.country_id}
           />
         </div>
         {/* Leagues */}
         <div>
+          <Label>Leagues</Label>
           <SelectCountryLeague
+            value={leagueId}
             data={leagues}
             name="Leagues"
             setValue={setLeagueId}
-            value={team.league_id}
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g Chinese" {...field} />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div>
+          <Label>Name</Label>
+          <Input
+            value={name}
+            onChange={(evt) => setName(evt.target.value)}
+            placeholder="e.g Chinese"
+          />
+        </div>
 
         <ReactFileDropZone
-          setUploadedImage={setUploadedImage}
-          uploadedImage={uploadedImage}
+          image_url={team.image_url}
+          onFileSelected={setSelectedFile}
+          selectedFile={selectedFile as File}
         />
 
-        <Button disabled={loading} type="submit">
-          {loading ? "loading..." : "Update"}
+        <Button disabled={loading} onClick={onSubmit}>
+          {loading ? "loading..." : "Create"}
         </Button>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
 }

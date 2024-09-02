@@ -6,6 +6,7 @@ export interface User {
   username: string;
   email: string;
   balance: number;
+  account_status: "string";
 }
 
 interface MyState {

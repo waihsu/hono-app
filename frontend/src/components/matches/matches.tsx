@@ -16,7 +16,7 @@ export default function Matches() {
         button={
           <Link
             className={cn(
-              buttonVariants({ variant: "outline" }),
+              buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
             to={`/backoffice/matches/new`}
@@ -29,11 +29,17 @@ export default function Matches() {
       />
       <div className=" grid md:grid-cols-1 lg:grid-cols-2 gap-2">
         {matches &&
-          matches.map((item) => (
-            <Link to={`/backoffice/matches/${item.id}`} key={item.id}>
-              <MatchCard match={item} />
-            </Link>
-          ))}
+          matches.map((item) => {
+            if (!item || !item.id) {
+              console.log("invalid match");
+              return null;
+            }
+            return (
+              <Link to={`/backoffice/matches/${item.id}`} key={item.id}>
+                <MatchCard match={item} />
+              </Link>
+            );
+          })}
       </div>
     </BackofficeLayout>
   );

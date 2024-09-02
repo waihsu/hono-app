@@ -18,7 +18,7 @@ import { Label } from "../ui/label";
 // });
 
 export default function NewMatchForm() {
-  const { addMatch, teams } = useAppStore();
+  const { teams } = useAppStore();
   const { token } = useTokenStore();
   const [matchDate, setMatchDate] = useState<Date | undefined>(undefined);
 
@@ -27,9 +27,11 @@ export default function NewMatchForm() {
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
-
+  const socket = new WebSocket(`ws://localhost:3000/api/matches?type=newmatch`);
   // 2. Define a submit handler.
   async function onSubmit() {
+    console.log("clicked");
+
     setLoading(true);
     const resp = await fetch("/api/matches", {
       method: "POST",
@@ -48,7 +50,8 @@ export default function NewMatchForm() {
     } else {
       const { newMatch } = data;
       console.log(newMatch);
-      addMatch(newMatch);
+      // addMatch(newMatch);
+      socket.send(JSON.stringify(newMatch));
       toast({ title: "successful" });
     }
   }

@@ -22,7 +22,11 @@ export default function SelectCountryLeague({
 }: SelectCountryLeagueProps) {
   return (
     <div>
-      <Select onValueChange={(value) => setValue(value)} defaultValue={value}>
+      <Select
+        value={value}
+        onValueChange={(value) => setValue(value)}
+        defaultValue={value}
+      >
         <SelectTrigger>
           <SelectValue placeholder={name} />
         </SelectTrigger>

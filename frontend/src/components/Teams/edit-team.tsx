@@ -1,4 +1,3 @@
-import React from "react";
 import BackofficeLayout from "../backoffice-layout";
 import Heading from "../Heading";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -45,7 +44,7 @@ export default function EditTeam() {
         button={
           <Link
             className={cn(
-              buttonVariants({ variant: "outline" }),
+              buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
             to={`/backoffice/teams`}
@@ -60,7 +59,7 @@ export default function EditTeam() {
         <div className=" flex justify-end">
           <DeleteDialog
             children={
-              <Button>
+              <Button variant={"destructive"}>
                 <Flag /> Delete
               </Button>
             }

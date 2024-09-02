@@ -14,7 +14,7 @@ export default function NewMatch() {
         button={
           <Link
             className={cn(
-              buttonVariants({ variant: "outline" }),
+              buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
             to={`/backoffice/matches`}

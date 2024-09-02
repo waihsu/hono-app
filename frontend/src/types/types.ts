@@ -1,3 +1,11 @@
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  balance: number;
+  account_status: "SUSPENDED" | "ACTIVE" | "BAN";
+}
+
 export interface League {
   id: string;
   name: string;
@@ -49,6 +57,17 @@ export interface Odd {
   odd_value: number;
   team_id: string;
   is_archived: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Bet {
+  id: string;
+  user_id: string;
+  betting_market_id: string;
+  odd_id: string;
+  amount: number;
+  bet_status: "PENDING" | "WON" | "LOST" | "CANCLED";
   created_at: Date;
   updated_at: Date;
 }

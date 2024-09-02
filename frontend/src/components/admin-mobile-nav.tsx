@@ -12,11 +12,12 @@ import {
 import { cn } from "@/lib/utils";
 
 import {
+  BadgeDollarSign,
   // BadgeDollarSign,
   Flag,
   LayoutDashboard,
-  ListOrdered,
   LucideIcon,
+  Receipt,
   Settings,
   Shield,
   ShieldHalf,
@@ -33,9 +34,9 @@ export const sidebarNav = [
     icon: LayoutDashboard,
   },
   {
-    title: "Orders",
-    href: `/backoffice/orders`,
-    icon: ListOrdered,
+    title: "Bets",
+    href: `/backoffice/bets`,
+    icon: Receipt,
   },
   {
     title: "Leagues",
@@ -57,11 +58,11 @@ export const sidebarNav = [
     href: `/backoffice/matches`,
     icon: Swords,
   },
-  // {
-  //   title: "Betting Market",
-  //   href: `/backoffice/bettingmarkets`,
-  //   icon: BadgeDollarSign,
-  // },
+  {
+    title: "Betting Market",
+    href: `/backoffice/bettingMarkets`,
+    icon: BadgeDollarSign,
+  },
   {
     title: "Settings",
     href: `/backoffice/settings`,
@@ -170,7 +171,7 @@ function MobileLink({
       }}
       className={
         (cn(className),
-        pathname === href
+        pathname.startsWith(href)
           ? "text-primary font-semibold"
           : "text-muted-foreground")
       }

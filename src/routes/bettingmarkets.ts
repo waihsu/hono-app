@@ -73,11 +73,11 @@ bettingMarkets.delete("/:id", async (c) => {
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
 
     const { id } = c.req.param();
-    const deletedCountry = await prisma.bettingMarkets.update({
+    const deletedBettingMarket = await prisma.bettingMarkets.update({
       where: { id },
       data: { is_archived: true },
     });
-    return c.json({ deletedCountry });
+    return c.json({ deletedBettingMarket });
   } catch (err) {
     console.log(err);
     return Response.json({ messg: "Error" }, { status: 405 });

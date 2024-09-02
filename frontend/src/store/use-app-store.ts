@@ -125,8 +125,10 @@ export const useAppStore = create<AppState>((set) => ({
   // Matches
   matches: [],
 
-  addMatch: (match: Match) =>
-    set((state) => ({ matches: [...(state.matches || []), match] })),
+  addMatch: (match: Match) => {
+    set((state) => ({ matches: [...(state.matches || []), match] }));
+  },
+
   updateMatch: (match: Match) =>
     set((state) => ({
       matches: state.matches.map((item) =>
@@ -135,7 +137,7 @@ export const useAppStore = create<AppState>((set) => ({
     })),
   removeMatch: (match: Match) =>
     set((state) => ({
-      countries: state.countries.filter((item) => item.id !== match.id),
+      matches: state.matches.filter((item) => item.id !== match.id),
     })),
 
   //Betting Markets

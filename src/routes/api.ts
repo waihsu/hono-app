@@ -9,16 +9,31 @@ import { storage } from "../libs/firebase";
 import teams from "./teams";
 import matches from "./matches";
 import bettingMarkets from "./bettingmarkets";
+import odds from "./odds";
+import admin from "./admin";
+import { createBunWebSocket } from "hono/bun";
+import { ServerWebSocket } from "bun";
+
+const { websocket, upgradeWebSocket } = createBunWebSocket();
+
+const topic = "public";
 
 const api = new Hono();
 
 api.get("/appData", async (c) => {
   try {
-    const leagues = await prisma.leagues.findMany();
-    const countries = await prisma.countries.findMany();
-    const teams = await prisma.teams.findMany();
+    const leagues = await prisma.leagues.findMany({
+      where: { is_archived: false },
+    });
+    const countries = await prisma.countries.findMany({
+      where: { is_archived: false },
+    });
+    const teams = await prisma.teams.findMany({
+      where: { is_archived: false },
+    });
     const matches = await prisma.matches.findMany({
       orderBy: { created_at: "desc" },
+      where: { is_archived: false },
     });
     const bettingMarkets = await prisma.bettingMarkets.findMany({
       where: { is_archived: false },
@@ -34,12 +49,16 @@ api.get("/appData", async (c) => {
   }
 });
 
+// Routes
+api.route("/admin", admin);
 api.route("/leagues", leagues);
 api.route("/countries", countries);
 api.route("/teams", teams);
 api.route("/matches", matches);
 api.route("/bettingmarkets", bettingMarkets);
+api.route("/odds", odds);
 
+// Login
 api.post("/login", async (c) => {
   try {
     const { email, password }: { email: string; password: string } =
@@ -60,7 +79,7 @@ api.post("/login", async (c) => {
     const payload = {
       sub: existEmail.id,
       role: existEmail.user_role,
-      exp: Math.floor(Date.now() / 1000) + 60 * 500, // Token expires in 5 minutes
+      exp: Math.floor(Date.now() / 1000) + 60 * 5000, // Token expires in 5 minutes
     };
 
     const token = await sign(payload, process.env.JWT_SECRET!);
@@ -77,6 +96,7 @@ api.post("/login", async (c) => {
   }
 });
 
+// Register
 api.post("/register", async (c) => {
   const {
     username,
@@ -100,6 +120,7 @@ export const generateRandomNumber = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+// Image Upload
 api.post(
   "/upload",
   bodyLimit({

@@ -22,6 +22,19 @@ const RemainTime = ({ matchDate }: { matchDate: Date }) => {
     <div className="flex items-end gap-2">
       <div className="grid gap-1 text-center">
         <Label htmlFor="hours" className="text-xs">
+          {timeRemaining.days > 1 ? "Days" : "Day"}
+        </Label>
+        <div
+          className={cn(
+            "w-[48px] text-center font-mono text-base tabular-nums caret-transparent focus:bg-accent focus:text-accent-foreground [&::-webkit-inner-spin-button]:appearance-none"
+          )}
+        >
+          {timeRemaining.days}
+        </div>
+      </div>
+
+      <div className="grid gap-1 text-center">
+        <Label htmlFor="hours" className="text-xs">
           Hours
         </Label>
         <div
@@ -66,7 +79,7 @@ const calculateTimeRemaining = (targetDate: Date) => {
   const difference = new Date(targetDate).getTime() - now.getTime();
 
   let timeRemaining = {
-    // days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
     hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
     minutes: Math.floor((difference / 1000 / 60) % 60),
     seconds: Math.floor((difference / 1000) % 60),
@@ -75,7 +88,7 @@ const calculateTimeRemaining = (targetDate: Date) => {
   // If the match date has passed, reset to 0
   if (difference < 0) {
     timeRemaining = {
-      //   days: 0,
+      days: 0,
       hours: 0,
       minutes: 0,
       seconds: 0,
