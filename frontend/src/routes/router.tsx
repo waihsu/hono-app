@@ -64,7 +64,7 @@ export default function Router() {
         // console.log(payload);
         removeMatch(JSON.parse(payload));
       } else if (type === "newbettingmarket") {
-        console.log(payload);
+        // console.log(payload);
         addBettingMarket(JSON.parse(payload));
       } else if (type === "deleteBettingMarket") {
         removeBettingMarket(JSON.parse(payload));

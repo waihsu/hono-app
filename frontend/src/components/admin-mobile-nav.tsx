@@ -18,7 +18,7 @@ import {
   LayoutDashboard,
   LucideIcon,
   Receipt,
-  Settings,
+  // Settings,
   Shield,
   ShieldHalf,
   Swords,
@@ -63,11 +63,11 @@ export const sidebarNav = [
     href: `/backoffice/bettingMarkets`,
     icon: BadgeDollarSign,
   },
-  {
-    title: "Settings",
-    href: `/backoffice/settings`,
-    icon: Settings,
-  },
+  // {
+  //   title: "Settings",
+  //   href: `/backoffice/settings`,
+  //   icon: Settings,
+  // },
 ];
 export default function AdminMobileNav({ name }: { name: string }) {
   const location = useLocation();

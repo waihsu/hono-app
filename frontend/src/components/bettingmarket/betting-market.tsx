@@ -63,7 +63,7 @@ export default function BettingMarket() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { deletedBettingMarket } = data;
-      console.log(deletedBettingMarket);
+      // console.log(deletedBettingMarket);
       socket.send(JSON.stringify(deletedBettingMarket));
       toast({ title: "successful" });
     }
