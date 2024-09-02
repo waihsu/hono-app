@@ -21,9 +21,7 @@ import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
 
 export default function BettingMarket() {
-  const socket = new WebSocket(
-    `ws://localhost:3000/api/matches?type=deleteBettingMarket`
-  );
+  const socket = new WebSocket(`/api/matches?type=deleteBettingMarket`);
   const { matchId } = useParams();
   const navigate = useNavigate();
   const { matches, bettingMarkets, odds } = useAppStore();

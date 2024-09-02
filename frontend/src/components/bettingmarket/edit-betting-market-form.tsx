@@ -40,9 +40,7 @@ export default function EditBettingMarketForm({
 }) {
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
-  const socket = new WebSocket(
-    `ws://localhost:3000/api/matches?type=newbettingmarket`
-  );
+  const socket = new WebSocket(`/api/matches?type=newbettingmarket`);
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

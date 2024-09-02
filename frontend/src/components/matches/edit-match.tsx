@@ -16,9 +16,7 @@ export default function EditMatch() {
   const { token } = useTokenStore();
   const navigate = useNavigate();
   const { matches } = useAppStore();
-  const socket = new WebSocket(
-    `ws://localhost:3000/api/matches?type=removematch`
-  );
+  const socket = new WebSocket(`/api/matches?type=removematch`);
   const match = matches.find((item) => item.id === id);
   if (!match) return null;
   const onDelete = async () => {

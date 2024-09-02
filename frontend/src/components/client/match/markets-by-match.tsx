@@ -7,15 +7,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAppStore } from "@/store/use-app-store";
-import React from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export default function MarketByMatch() {
   const { matchId } = useParams();
-  const navigate = useNavigate();
   const { matches, bettingMarkets, odds } = useAppStore();
   const validMatch = matches.find((item) => item.id === matchId);
   if (!validMatch) return null;
@@ -58,29 +55,11 @@ export default function MarketByMatch() {
                 }
                 return (
                   <AccordionItem value={item.id} key={item.id}>
-                    <AccordionTrigger>
-                      <Link
-                        className="text-xl sm:text-2xl"
-                        to={`/backoffice/odds/${matchId}/${item.id}?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`}
-                      >
-                        {item.market_type}
-                      </Link>
-                    </AccordionTrigger>
+                    <AccordionTrigger>{item.market_type}</AccordionTrigger>
                     <AccordionContent>
                       <Separator className=" mb-2" />
                       <div className="flex justify-between items-center my-3">
                         <h1 className="text-lg font-semibold">Odds</h1>
-                        <Button
-                          variant={"default"}
-                          className=" ml-auto items-end"
-                          onClick={() =>
-                            navigate(
-                              `/backoffice/odds/${matchId}/${item.id}/new?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`
-                            )
-                          }
-                        >
-                          Create Odd
-                        </Button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>

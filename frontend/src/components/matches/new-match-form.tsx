@@ -27,7 +27,7 @@ export default function NewMatchForm() {
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
-  const socket = new WebSocket(`ws://localhost:3000/api/matches?type=newmatch`);
+  const socket = new WebSocket(`/api/matches?type=newmatch`);
   // 2. Define a submit handler.
   async function onSubmit() {
     console.log("clicked");

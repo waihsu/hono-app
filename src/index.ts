@@ -107,6 +107,7 @@ app.use("*", serveStatic({ root: "./frontend/dist" }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
 
 const server = Bun.serve({
+  port: process.env.NODE_ENV,
   fetch: app.fetch,
   websocket,
 });

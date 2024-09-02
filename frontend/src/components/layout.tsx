@@ -9,7 +9,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <MainNav name="Football" />
       <div>
         {children}
-        <MainFooter />
+        <div className=" mt-10">
+          <MainFooter />
+        </div>
       </div>
     </div>
   );

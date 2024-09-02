@@ -8,7 +8,7 @@ export default function BackofficeLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const socket = new WebSocket(`ws://localhost:3000/admin`);
+  const socket = new WebSocket(`/admin`);
   useEffect(() => {
     socket.onmessage = (ev) => {
       const { type, payload } = JSON.parse(ev.data);
