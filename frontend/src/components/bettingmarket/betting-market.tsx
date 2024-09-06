@@ -21,7 +21,7 @@ import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
 
 export default function BettingMarket() {
-  const socket = new WebSocket(`/api/matches?type=deleteBettingMarket`);
+  const socket = new WebSocket(`/ws/actions?type=deleteBettingMarket`);
   const { matchId } = useParams();
   const navigate = useNavigate();
   const { matches, bettingMarkets, odds } = useAppStore();
@@ -110,14 +110,14 @@ export default function BettingMarket() {
                 }
                 return (
                   <AccordionItem value={item.id} key={item.id}>
-                    <AccordionTrigger>
+                    <AccordionTrigger className="flex items-center justify-between gap-2">
                       <Link
                         className="text-xl sm:text-2xl"
                         to={`/backoffice/odds/${matchId}/${item.id}?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`}
                       >
                         {item.market_type}
                       </Link>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mr-auto ">
                         <Button
                           size={"icon"}
                           variant={"outline"}

@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
 import SelectCountryLeague from "../select-country-league";
 import { Odd } from "@/types/types";
 
@@ -34,10 +33,10 @@ export default function EditOddForm({
   odd: Odd;
   data: { id: string; name: string }[];
 }) {
-  const { addOdd } = useAppStore();
+  const socket = new WebSocket(`/ws/actions?type=editodd`);
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState(odd.team_id);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,12 +69,12 @@ export default function EditOddForm({
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { newOdd } = data;
-      console.log(newOdd);
-      addOdd(newOdd);
+      const { updatedOdd } = data;
+      socket.send(JSON.stringify(updatedOdd));
       toast({ title: "successful" });
     }
   }
+  console.log(odd);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -109,7 +108,7 @@ export default function EditOddForm({
         />
         <div>
           <SelectCountryLeague
-            value={odd.team_id}
+            value={selectedTeamId}
             data={data}
             name="Team"
             setValue={(value: string) => setSelectedTeamId(value)}

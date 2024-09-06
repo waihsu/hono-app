@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
 import SelectCountryLeague from "../select-country-league";
 
 const formSchema = z.object({
@@ -32,11 +31,10 @@ export default function NewOddForm({
   bettingMarketId: string;
   data: { id: string; name: string }[];
 }) {
-  const { addOdd } = useAppStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState("");
-
+  const socket = new WebSocket(`/ws/actions?type=newodd`);
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,7 +67,7 @@ export default function NewOddForm({
     } else {
       const { newOdd } = data;
       console.log(newOdd);
-      addOdd(newOdd);
+      socket.send(JSON.stringify(newOdd));
       toast({ title: "successful" });
     }
   }

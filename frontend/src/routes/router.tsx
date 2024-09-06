@@ -26,10 +26,20 @@ import EditMatch from "@/components/matches/edit-match";
 import BettingMarketsByMatch from "@/components/bettingmarket/BettingMarketsByMatch";
 import Bets from "@/components/bets/bets";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAdminStore } from "@/store/use-admin-store";
 import BackofficeDashboard from "@/components/dashboard/dashboard";
 import MarketByMatch from "@/components/client/match/markets-by-match";
 import EditBettingMarket from "@/components/bettingmarket/edit-bettingMarket";
+import Cart from "@/components/client/cart/cart";
+import Transations from "@/components/transations/transtations";
+import Deposit from "@/components/client/deposit/deposit";
+import Withdraw from "@/components/client/withdraw/withdraw";
+import Payments from "@/components/payments/payments";
+import NewPayment from "@/components/payments/new-payment";
+import EditPayment from "@/components/payments/edit-payment";
+import BetHistory from "@/components/client/bethistory/bet-history";
+import TransationHistroy from "@/components/client/transationhistory/transation-history";
+import DepositForm from "@/components/client/deposit/deposit-form";
+import AdminByMatches from "@/components/client/adminbymatches/adminbymatches";
 
 export default function Router() {
   const {
@@ -39,11 +49,18 @@ export default function Router() {
     removeMatch,
     addBettingMarket,
     removeBettingMarket,
+    addOdd,
+    updateOdd,
+    removeOdd,
+    userUpdateBet,
+    addUserPayment,
+    updateUserPayment,
+    setCurrentUser,
   } = useAppStore();
-  const { getAdminAppData } = useAdminStore();
-  const { token, user } = useTokenStore();
 
-  const socket = new WebSocket(`/app?userId=${user?.id}`);
+  const { user } = useTokenStore();
+
+  const socket = new WebSocket(`ws://localhost:3000/app?userId=${user?.id}`);
 
   useEffect(() => {
     socket.onopen = () => {
@@ -68,6 +85,21 @@ export default function Router() {
         addBettingMarket(JSON.parse(payload));
       } else if (type === "deleteBettingMarket") {
         removeBettingMarket(JSON.parse(payload));
+      } else if (type === "newodd") {
+        addOdd(JSON.parse(payload));
+      } else if (type === "editodd") {
+        updateOdd(JSON.parse(payload));
+      } else if (type === "deleteodd") {
+        removeOdd(JSON.parse(payload));
+      } else if (type === user?.id) {
+        userUpdateBet(JSON.parse(payload));
+      } else if (type === "newpayment") {
+        addUserPayment(JSON.parse(payload));
+      } else if (type === "editpayment") {
+        updateUserPayment(JSON.parse(payload));
+      } else if (type === `balance${user?.id}`) {
+        console.log(payload);
+        setCurrentUser(JSON.parse(payload));
       }
     };
     return () => {
@@ -75,19 +107,35 @@ export default function Router() {
     };
   }, []);
   useEffect(() => {
-    getAppData();
-    if (token) {
-      getAdminAppData(token);
-    }
+    if (!user?.id) return;
+    getAppData(user?.id as string);
   }, []);
   return (
     <Routes>
       <Route element={<ProtectRoute />}>
         <Route path="/" Component={App} />
-        <Route path="/matches/:matchId" Component={MarketByMatch} />
+        <Route path="/allmatches/:adminId" Component={AdminByMatches} />
+        <Route path="/:adminId/matches/:matchId" Component={MarketByMatch} />
+
+        {/* Client Bets */}
+        <Route path="/bethistory" Component={BetHistory} />
+        <Route path="/transations" Component={TransationHistroy} />
+
+        {/* Transation */}
+        <Route path="/deposit" Component={Deposit} />
+        <Route path="/deposit/:paymentId" Component={DepositForm} />
+        <Route path="/withdraw" Component={Withdraw} />
+
+        {/* Carts */}
+        <Route path="/carts/:userId" Component={Cart} />
 
         {/* BackOffice Dashboard */}
         <Route path="/backoffice/dashboard" Component={BackofficeDashboard} />
+        <Route path="/backoffice/payments" Component={Payments} />
+        <Route path="/backoffice/payments/new" Component={NewPayment} />
+        <Route path="/backoffice/payments/:paymentId" Component={EditPayment} />
+
+        <Route path="/backoffice/transations" Component={Transations} />
 
         {/* League */}
         <Route path="/backoffice/leagues" Component={Leagues} />

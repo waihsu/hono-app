@@ -126,7 +126,9 @@ export function Register() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Register</Button>
+              <div>
+                <Button type="submit">Register</Button>
+              </div>
               <Link to={"/login"}>Already have account? login</Link>
             </form>
           </Form>

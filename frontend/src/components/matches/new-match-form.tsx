@@ -19,7 +19,7 @@ import { Label } from "../ui/label";
 
 export default function NewMatchForm() {
   const { teams } = useAppStore();
-  const { token } = useTokenStore();
+  const { token, user } = useTokenStore();
   const [matchDate, setMatchDate] = useState<Date | undefined>(undefined);
 
   const [homeTeamId, setHomeTeamId] = useState<string>("");
@@ -27,19 +27,24 @@ export default function NewMatchForm() {
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
-  const socket = new WebSocket(`/api/matches?type=newmatch`);
+  const socket = new WebSocket(`/ws/actions?type=newmatch`);
   // 2. Define a submit handler.
   async function onSubmit() {
     console.log("clicked");
 
     setLoading(true);
-    const resp = await fetch("/api/matches", {
+    const resp = await fetch(`/api/matches`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Bearer: token,
       },
-      body: JSON.stringify({ homeTeamId, awayTeamId, matchDate }),
+      body: JSON.stringify({
+        homeTeamId,
+        awayTeamId,
+        matchDate,
+        adminId: user?.id,
+      }),
     });
     setLoading(false);
     const data = await resp.json();
@@ -49,7 +54,7 @@ export default function NewMatchForm() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { newMatch } = data;
-      console.log(newMatch);
+      // console.log(newMatch);
       // addMatch(newMatch);
       socket.send(JSON.stringify(newMatch));
       toast({ title: "successful" });

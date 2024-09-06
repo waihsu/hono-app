@@ -21,10 +21,14 @@ model User {
   balance Float @default(0)
   account_status AccountStatusType @default(ACTIVE)
 
-user_role UserRole @default(USER)
+  user_role UserRole @default(USER)
 
   Bets Bets[]
   Transations Transactions[]
+  Matches Matches[]
+  Admin Bets[] @relation("ADMIN")
+  Payments Payment[] @relation("Payment")
+
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -84,11 +88,15 @@ is_archived Boolean @default(false)
   HomeTeam  Teams @relation("HomeTeam",fields: [home_team_id],references: [id])
   AwayTeam  Teams @relation("AwayTeam",fields: [away_team_id],references: [id])
   BettingMarkets BettingMarkets[]
+  user_id  String
+  User  User @relation(fields: [user_id],references: [id])
+  
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
 
   @@unique([home_team_id,away_team_id])
+  @@index([user_id])
 }
 
 model BettingMarkets {
@@ -133,8 +141,10 @@ model Bets {
   betting_market_id String
   odd_id  String
   amount  Int
-  bet_status Bet_Status
+  bet_status Bet_Status @default(PENDING)
+  admin_id  String
 
+  Admin User @relation("ADMIN",fields: [admin_id],references: [id])
   users User @relation(fields: [user_id],references: [id])
   BettingMarkets BettingMarkets @relation(fields: [betting_market_id],references: [id])
   Odds Odds @relation(fields: [odd_id],references: [id])
@@ -147,19 +157,37 @@ model Bets {
 model Transactions {
   id  String @id @default(cuid())
   user_id String
-  payment_method  Payment_Method
+  payment_id  String
   amount  Int
-  phone_number  Int
+  phone_number  String
   name  String
-  kpay_tran_id  String
-  transation_status Transation_Status
-
+  transfer_id  String?
+  transation_status Transation_Status @default(PENDING)
+  transaction_type  Transation_Type
   users User @relation(fields: [user_id],references: [id])
+  payments Payment @relation(fields: [payment_id],references: [id])
+is_archived Boolean @default(false)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
 
   @@index([user_id])
+}
+
+model Payment {
+  id  String @id @default(cuid())
+  payment_name  String
+  payment_number String
+  name String
+  admin_id  String
+is_archived Boolean @default(false)
+  Admin User @relation("Payment",fields: [admin_id],references: [id])
+
+  Transations Transactions[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([admin_id])
 }
 
 
@@ -199,6 +227,12 @@ enum Payment_Method {
 }
 
 enum Transation_Status {
+  PENDING
   COMPLETED
   FAILED
+}
+
+enum Transation_Type {
+  DEPOSIT
+  WITHDRAW
 }

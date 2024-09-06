@@ -10,10 +10,11 @@ import DeleteDialog from "../delete-dialog";
 import EditOddForm from "./edit-odd-form";
 
 export default function EditOdd() {
+  const socket = new WebSocket(`/ws/actions?type=deleteodd`);
   const { oddId } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { odds, teams, removeOdd } = useAppStore();
+  const { odds, teams } = useAppStore();
   const validOdd = odds.find((item) => item.id === oddId);
   if (!validOdd) return null;
 
@@ -42,10 +43,9 @@ export default function EditOdd() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { deletedOdd } = data;
-      console.log(deletedOdd);
-      removeOdd(deletedOdd);
+      socket.send(JSON.stringify(deletedOdd));
       toast({ title: "successful" });
-      navigate("/backoffice/countries");
+      navigate(-1);
     }
   };
   return (

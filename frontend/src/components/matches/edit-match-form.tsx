@@ -29,7 +29,7 @@ export default function EditMatchForm({ match }: { match: Match }) {
   const [awayTeamId, setAwayTeamId] = useState<string>(match.away_team_id);
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const socket = new WebSocket(`/api/matches?type=editmatch`);
+  const socket = new WebSocket(`/ws/actions?type=editmatch`);
 
   // 2. Define a submit handler.
   async function onSubmit() {

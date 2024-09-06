@@ -7,6 +7,7 @@ export interface User {
   email: string;
   balance: number;
   account_status: "string";
+  user_role: "ADMIN" | "SUPERADMIN" | "USER";
 }
 
 interface MyState {

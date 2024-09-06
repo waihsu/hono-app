@@ -7,9 +7,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useAppStore } from "@/store/use-app-store";
 import MatchCard from "./match-card";
+import { useTokenStore } from "@/store/use-bear-store";
 
 export default function Matches() {
   const { matches } = useAppStore();
+  const { user } = useTokenStore();
+  const AdminByMatches = matches.filter((match) => match.user_id === user?.id);
   return (
     <BackofficeLayout>
       <Heading
@@ -28,8 +31,8 @@ export default function Matches() {
         name="Matches"
       />
       <div className=" grid md:grid-cols-1 lg:grid-cols-2 gap-2">
-        {matches &&
-          matches.map((item) => {
+        {AdminByMatches &&
+          AdminByMatches.map((item) => {
             if (!item || !item.id) {
               console.log("invalid match");
               return null;

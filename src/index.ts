@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import api from "./routes/api";
 import { createBunWebSocket } from "hono/bun";
 import { ServerWebSocket } from "bun";
+import { data, matches } from "./libs/data";
 
 const { websocket, upgradeWebSocket } = createBunWebSocket();
 
@@ -32,7 +33,6 @@ app.get(
     },
     onMessage(evt, ws) {
       const rawWs = ws.raw as ServerWebSocket;
-      console.log("inmessage", userSocketMap);
       rawWs.subscribe(admin);
       const data = { type: "onlineusers", payload: userSocketMap };
       rawWs.publish(admin, JSON.stringify(data));
@@ -50,7 +50,7 @@ app.get(
   }))
 );
 app.get(
-  "/api/matches",
+  "/ws/actions",
   upgradeWebSocket((_) => ({
     onOpen(_, ws) {
       const rawWs = ws.raw as ServerWebSocket;
@@ -81,23 +81,22 @@ app.get(
     },
     onMessage(evt, ws) {
       const rawWs = ws.raw as ServerWebSocket;
-      console.log(evt.data);
-      const NewMessage = evt.data;
-      const data = { type: "newmessage", payload: NewMessage };
-      rawWs.publish(admin, JSON.stringify(data));
+      const type = ws.url?.searchParams.get("type");
+      if (type) {
+        rawWs.publish(admin, JSON.stringify({ type, payload: evt.data }));
+      }
     },
     onClose(_, ws) {
       const rawWs = ws.raw as ServerWebSocket;
       rawWs.unsubscribe(admin);
-      console.log(
-        `WebSocket server closed and unsubscribed from topic '${"topic"}'`
-      );
+      console.log(`WebSocket server closed and unsubscribed from admin '`);
     },
   }))
 );
 
 app.get("/test", (c) => {
-  return c.text("Hello Hono!");
+  console.log(matches.map((item) => item.status));
+  return c.json({ data: matches.map((item) => item) });
 });
 
 app.route("/api", api).use(cors());
@@ -107,7 +106,7 @@ app.use("*", serveStatic({ root: "./frontend/dist" }));
 app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
 
 const server = Bun.serve({
-  port: process.env.NODE_ENV,
+  port: process.env.NODE_ENV || 3000,
   fetch: app.fetch,
   websocket,
 });

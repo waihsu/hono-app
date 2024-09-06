@@ -4,6 +4,7 @@ export interface User {
   email: string;
   balance: number;
   account_status: "SUSPENDED" | "ACTIVE" | "BAN";
+  user_role: "ADMIN" | "SUPERADMIN" | "USER";
 }
 
 export interface League {
@@ -31,6 +32,7 @@ export interface Team {
 
 export interface Match {
   id: string;
+  user_id: string;
   home_team_id: string;
   away_team_id: string;
   match_date: Date;
@@ -64,10 +66,35 @@ export interface Odd {
 export interface Bet {
   id: string;
   user_id: string;
+  admin_id: string;
   betting_market_id: string;
   odd_id: string;
   amount: number;
   bet_status: "PENDING" | "WON" | "LOST" | "CANCLED";
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Transation {
+  id: string;
+  user_id: string;
+  payment_id: string;
+  amount: number;
+  phone_number: string;
+  name: string;
+  transfer_id: string | null;
+  transaction_type: string;
+  transation_status: "PENDING" | "COMPLETED" | "FAILED";
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Payment {
+  id: string;
+  payment_name: string;
+  payment_number: string;
+  name: string;
+  admin_id: string;
   created_at: Date;
   updated_at: Date;
 }

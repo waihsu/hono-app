@@ -1,16 +1,32 @@
 import { toast } from "@/components/ui/use-toast";
 import {
+  Bet,
   BettingMarket,
   Country,
   League,
   Match,
   Odd,
+  Payment,
   Team,
+  Transation,
+  User,
 } from "@/types/types";
 import { create } from "zustand";
 
+export interface CurrentUser {
+  id: string;
+  username: string;
+  email: string;
+  balance: number;
+  user_role: string;
+  account_status: string;
+}
+
 interface AppState {
-  getAppData: () => void;
+  admins: User[];
+  currentUser: CurrentUser | null;
+  setCurrentUser: (user: CurrentUser) => void;
+  getAppData: (userId: string) => void;
 
   //Countries
   countries: Country[];
@@ -49,18 +65,68 @@ interface AppState {
   addOdd: (Odd: Odd) => void;
   updateOdd: (Odd: Odd) => void;
   removeOdd: (Odd: Odd) => void;
+
+  //UserBets
+  userBets: Bet[];
+  userAddBet: (Bet: Bet) => void;
+  userUpdateBet: (Bet: Bet) => void;
+  userRemoveBet: (Bet: Bet) => void;
+
+  //UserPayments
+  userPayments: Payment[];
+  // setCountry: (country: Country[]) => void;
+  addUserPayment: (payment: Payment) => void;
+  updateUserPayment: (payment: Payment) => void;
+  removeUserPayment: (payment: Payment) => void;
+
+  //Transations
+  userTransations: Transation[];
+  // setCountry: (country: Country[]) => void;
+  addUserTransation: (Transation: Transation) => void;
+  updateUserTransation: (Transation: Transation) => void;
+  removeUserTransation: (Transation: Transation) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  getAppData: async () => {
-    const resp = await fetch("/api/appData", {
+  admins: [],
+  currentUser: null,
+
+  setCurrentUser: (user: CurrentUser) => {
+    set({ currentUser: user });
+  },
+
+  getAppData: async (userId: string) => {
+    const resp = await fetch(`/api/appData/${userId}`, {
       method: "GET",
-      headers: { "Content-Type": "application/json", Bearer: "" },
+      headers: { "Content-Type": "application/json" },
     });
     if (resp.ok) {
-      const { leagues, countries, teams, matches, bettingMarkets, odds } =
-        await resp.json();
-      set({ leagues, countries, teams, matches, bettingMarkets, odds });
+      const {
+        leagues,
+        countries,
+        teams,
+        matches,
+        bettingMarkets,
+        odds,
+        payments,
+        admins,
+        userBets,
+        transactions,
+        currentUser,
+      } = await resp.json();
+      set({
+        leagues,
+        countries,
+        teams,
+        matches,
+        bettingMarkets,
+        odds,
+        userPayments: payments,
+        admins,
+        userBets,
+        userTransations: transactions,
+        currentUser,
+      });
     } else {
       set({
         leagues: [],
@@ -172,5 +238,56 @@ export const useAppStore = create<AppState>((set) => ({
   removeOdd: (odd: Odd) =>
     set((state) => ({
       odds: state.odds.filter((item) => item.id !== odd.id),
+    })),
+
+  // UserBets
+  userBets: [],
+  userAddBet: (bet: Bet) =>
+    set((state) => ({
+      userBets: [...(state.userBets || []), bet],
+    })),
+  userUpdateBet: (bet: Bet) =>
+    set((state) => ({
+      userBets: state.userBets.map((item) => (item.id === bet.id ? bet : item)),
+    })),
+  userRemoveBet: (bet: Bet) =>
+    set((state) => ({
+      userBets: state.userBets.filter((item) => item.id !== bet.id),
+    })),
+
+  // Payments
+  userPayments: [],
+  addUserPayment: (payment: Payment) =>
+    set((state) => ({
+      userPayments: [...(state.userPayments || []), payment],
+    })),
+  updateUserPayment: (payment: Payment) =>
+    set((state) => ({
+      userPayments: state.userPayments.map((item) =>
+        item.id === payment.id ? payment : item
+      ),
+    })),
+  removeUserPayment: (payment: Payment) =>
+    set((state) => ({
+      userPayments: state.userPayments.filter((item) => item.id !== payment.id),
+    })),
+
+  // Transations
+  userTransations: [],
+  addUserTransation: (Transation: Transation) =>
+    set((state) => ({
+      userTransations: [...(state.userTransations || []), Transation],
+    })),
+  updateUserTransation: (Transation: Transation) =>
+    set((state) => ({
+      userTransations: state.userTransations.map((item) =>
+        item.id === Transation.id ? Transation : item
+      ),
+    })),
+  removeUserTransation: (Transation: Transation) =>
+    set((state) => ({
+      userTransations: state.userTransations.filter(
+        (item) => item.id !== Transation.id
+      ),
     })),
 }));

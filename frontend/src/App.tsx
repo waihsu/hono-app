@@ -1,12 +1,9 @@
-import { Link } from "react-router-dom";
 import Layout from "./components/layout";
-import { useAppStore } from "./store/use-app-store";
-import MatchCard from "./components/matches/match-card";
+
 import { Separator } from "./components/ui/separator";
+import MatchesByAdmin from "./components/MatchesByAdmin";
 
 function App() {
-  const { matches } = useAppStore();
-  console.log(matches);
   return (
     <Layout>
       <div
@@ -30,19 +27,20 @@ function App() {
         </div>
         <Separator className="mb-10" />
         <div className=" grid md:grid-cols-1 lg:grid-cols-2 gap-2">
-          {matches &&
+          {/* {matches &&
             matches.map((item) => {
               if (!item || !item.id) {
                 console.log("invalid match");
                 return null;
               }
               return (
-                <Link to={`/matches/${item.id}`} key={item.id}>
+                <Link to={`${item.admin_id}/matches/${item.id}`} key={item.id}>
                   <MatchCard match={item} />
                 </Link>
               );
-            })}
+            })} */}
         </div>
+        <MatchesByAdmin />
       </div>
     </Layout>
   );

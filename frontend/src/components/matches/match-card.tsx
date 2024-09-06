@@ -11,18 +11,18 @@ export default function MatchCard({ match }: { match: Match }) {
   const awayTeam = teams.find((item) => item.id === match.away_team_id);
   //   console.log(match.match_date);
   return (
-    <Card className=" py-4 bg-background shadow-lg drop-shadow-md hover:drop-shadow-xl transition-all">
+    <Card className=" p-4 bg-background shadow-lg drop-shadow-md hover:drop-shadow-xl transition-all">
       <div className="flex flex-col justify-center items-center gap-3 ">
-        <div className="grid grid-cols-3  w-full  my-4 gap-3 ">
+        <div className="grid grid-cols-3  w-full  my-4 sm:gap-3 ">
           <div className="flex w-full justify-center items-center gap-2">
-            <p className="text-sm sm:text-lg text-center  text-pretty">
+            <p className="text-xs sm:text-sm text-center  text-pretty">
               {homeTeam?.name}
             </p>
 
             <img
               src={homeTeam?.image_url}
               alt=""
-              className="w-8 h-8 sm:w-16 sm:h-16 object-center"
+              className="w-6 h-6 sm:w-8 sm:h-8 object-center"
             />
           </div>
           <div className="flex items-center justify-center gap-x-2">
@@ -37,9 +37,9 @@ export default function MatchCard({ match }: { match: Match }) {
             <img
               src={awayTeam?.image_url}
               alt=""
-              className="w-8 h-8 sm:w-16 sm:h-16 object-center"
+              className="w-6 h-6 sm:w-8 sm:h-8 object-center"
             />
-            <p className="text-wrap text-center text-sm sm:text-lg">
+            <p className="text-wrap text-center text-xs sm:text-sm">
               {awayTeam?.name}
             </p>
           </div>

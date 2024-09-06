@@ -11,17 +11,28 @@ import matches from "./matches";
 import bettingMarkets from "./bettingmarkets";
 import odds from "./odds";
 import admin from "./admin";
-import { createBunWebSocket } from "hono/bun";
-import { ServerWebSocket } from "bun";
-
-const { websocket, upgradeWebSocket } = createBunWebSocket();
-
-const topic = "public";
+import bets from "./bets";
+import payments from "./payments";
+import transactions from "./transations";
 
 const api = new Hono();
 
-api.get("/appData", async (c) => {
+// Routes
+api.route("/admin", admin);
+api.route("/leagues", leagues);
+api.route("/countries", countries);
+api.route("/teams", teams);
+api.route("/matches", matches);
+api.route("/bettingmarkets", bettingMarkets);
+api.route("/odds", odds);
+api.route("/bets", bets);
+api.route("/payments", payments);
+api.route("/transactions", transactions);
+
+// App Data
+api.get("/appData/:userId", async (c) => {
   try {
+    const { userId } = c.req.param();
     const leagues = await prisma.leagues.findMany({
       where: { is_archived: false },
     });
@@ -40,23 +51,57 @@ api.get("/appData", async (c) => {
     });
     const bettingMartketIds = bettingMarkets.map((item) => item.id);
     const odds = await prisma.odds.findMany({
-      where: { betting_market_id: { in: bettingMartketIds } },
+      where: {
+        betting_market_id: { in: bettingMartketIds },
+        is_archived: false,
+      },
     });
-    return c.json({ leagues, countries, teams, matches, bettingMarkets, odds });
+    const payments = await prisma.payment.findMany();
+    const users = await prisma.user.findMany({
+      where: { user_role: "ADMIN" },
+    });
+    const userBets = await prisma.bets.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: "desc" },
+    });
+    const transactions = await prisma.transactions.findMany({
+      where: { user_id: userId },
+    });
+    const currentUser = await prisma.user.findFirst({
+      where: { id: userId },
+      select: {
+        id: true,
+        user_role: true,
+        username: true,
+        email: true,
+        balance: true,
+        account_status: true,
+      },
+    });
+    return c.json({
+      leagues,
+      countries,
+      teams,
+      matches,
+      bettingMarkets,
+      odds,
+      payments,
+      admins: users.map((item) => ({
+        id: item.id,
+        username: item.username,
+        email: item.email,
+        balance: item.balance,
+        account_status: item.account_status,
+      })),
+      userBets,
+      transactions,
+      currentUser,
+    });
   } catch (err) {
     console.log(err);
     return c.json({ messg: "Error" }, 405);
   }
 });
-
-// Routes
-api.route("/admin", admin);
-api.route("/leagues", leagues);
-api.route("/countries", countries);
-api.route("/teams", teams);
-api.route("/matches", matches);
-api.route("/bettingmarkets", bettingMarkets);
-api.route("/odds", odds);
 
 // Login
 api.post("/login", async (c) => {
@@ -89,6 +134,7 @@ api.post("/login", async (c) => {
       username: existEmail.username,
       email: existEmail.email,
       balance: existEmail.balance,
+      role: existEmail.user_role,
     };
     return c.json({ user, token });
   } catch (err) {

@@ -41,7 +41,7 @@ odds.post("/", async (c) => {
   }
 });
 
-odds.put("/:id", async (c) => {
+odds.put("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
 
@@ -63,7 +63,9 @@ odds.put("/:id", async (c) => {
       odd_value: string;
       team_id: string;
     } = await c.req.json();
-    const updatedCountry = await prisma.odds.update({
+    if (!id || !betting_market_id || !outcome || !odd_value || !team_id)
+      return c.json({ messg: "Form not valid" }, 403);
+    const updatedOdd = await prisma.odds.update({
       where: { id },
       data: {
         betting_market_id,
@@ -72,7 +74,7 @@ odds.put("/:id", async (c) => {
         team_id,
       },
     });
-    return c.json({ updatedCountry });
+    return c.json({ updatedOdd });
   } catch (err) {
     console.log(err);
     return c.json({ messg: "Error" }, 405);

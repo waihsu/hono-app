@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "./ui/use-toast";
 import { useTokenStore } from "@/store/use-bear-store";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().min(2).max(50),
@@ -31,6 +32,7 @@ const formSchema = z.object({
 export function Login() {
   const { addToken, setUser } = useTokenStore();
   const nevigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,11 +41,13 @@ export function Login() {
     },
   });
   const onLogin = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     const resp = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
+    setLoading(false);
     if (!resp.ok) {
       const { messg } = await resp.json();
       console.log(messg);
@@ -116,10 +120,12 @@ export function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Login</Button>
+              <Button disabled={loading} type="submit">
+                {loading ? "loading..." : "Login"}
+              </Button>
               <div>
                 <Link to={"/register"} className=" underline">
-                  Already have account? Register
+                  don't have account? Register
                 </Link>
               </div>
             </form>

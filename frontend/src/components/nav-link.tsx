@@ -1,10 +1,9 @@
-"use client";
 import { cn } from "@/lib/utils";
+import { LucideProps } from "lucide-react";
 
 import React from "react";
 
 import { Link, useLocation } from "react-router-dom";
-import { sidebarNav } from "./admin-mobile-nav";
 
 // const sidebarNav = [
 //   {
@@ -44,7 +43,17 @@ import { sidebarNav } from "./admin-mobile-nav";
 //   },
 // ];
 
-export default function NavLink() {
+export default function NavLink({
+  sidebarNav,
+}: {
+  sidebarNav: {
+    title: string;
+    href: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }[];
+}) {
   const location = useLocation();
 
   return (

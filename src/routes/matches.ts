@@ -9,32 +9,6 @@ const { websocket, upgradeWebSocket } = createBunWebSocket();
 
 const matches = new Hono();
 
-const topic = "custom1";
-matches.use(
-  "/",
-  upgradeWebSocket((_) => ({
-    onOpen(_, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.subscribe(topic);
-      console.log(
-        `WebSocket server opened Match and subscribed to topic '${topic}'`
-      );
-      // rawWs.publish(topic, "hello");
-    },
-    onMessage(evt, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.publish(topic, "Match");
-    },
-    onClose(_, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.unsubscribe(topic);
-      console.log(
-        `WebSocket server closed and unsubscribed from topic '${topic}'`
-      );
-    },
-  }))
-);
-
 matches.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
@@ -43,22 +17,26 @@ matches.post("/", async (c) => {
 
     const { role } = await verify(token, process.env.JWT_SECRET!);
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const {
       homeTeamId,
       awayTeamId,
       matchDate,
+      adminId,
     }: {
       homeTeamId: string;
       awayTeamId: string;
       matchDate: string;
+      adminId: string;
     } = await c.req.json();
-    if (!homeTeamId || !awayTeamId || !matchDate)
+    if (!homeTeamId || !awayTeamId || !matchDate || !adminId)
       return Response.json({ messg: "Form not valid" }, { status: 403 });
     const newMatch = await prisma.matches.create({
       data: {
         home_team_id: homeTeamId,
         away_team_id: awayTeamId,
         match_date: matchDate,
+        user_id: adminId,
       },
     });
     return c.json({ newMatch });
