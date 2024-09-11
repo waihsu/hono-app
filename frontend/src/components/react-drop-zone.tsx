@@ -10,8 +10,8 @@ export default function ReactFileDropZone({
   onFileSelected,
 }: {
   image_url?: string;
-  selectedFile: File;
-  onFileSelected: (acceptFile: File | null) => void;
+  selectedFile: File | undefined;
+  onFileSelected: (acceptFile: File | undefined) => void;
 }) {
   const { getRootProps, getInputProps } = useDropzone({
     maxFiles: 1,
@@ -22,7 +22,7 @@ export default function ReactFileDropZone({
       onFileSelected(acceptedFiles[0]);
     },
   });
-  console.log(selectedFile);
+  // console.log(selectedFile);
   return (
     <Card>
       <CardHeader>
@@ -41,7 +41,7 @@ export default function ReactFileDropZone({
           {selectedFile ? (
             <div className=" flex justify-center relative">
               <Button
-                onClick={() => onFileSelected(null)}
+                onClick={() => onFileSelected(undefined)}
                 size={"icon"}
                 className="absolute right-0"
               >

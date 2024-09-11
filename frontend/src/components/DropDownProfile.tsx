@@ -10,13 +10,13 @@ import { SignOut } from "./signout-button";
 import { Button } from "./ui/button";
 import { BadgeMinus, BadgePlus, ChartColumn, FileStack } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { CurrentUser } from "@/store/use-app-store";
+import { User } from "@/types/types";
 
 export function DropdownProfile({
   user,
   betItemsLength,
 }: {
-  user: CurrentUser;
+  user: User;
   betItemsLength: number;
 }) {
   const navigate = useNavigate();
@@ -46,17 +46,6 @@ export function DropdownProfile({
         </div>
         <DropdownMenuSeparator />
         <div>
-          {user.user_role === "ADMIN" || user.user_role === "SUPERADMIN" ? (
-            <Button
-              variant={"link"}
-              className="w-full"
-              onClick={() => navigate("/backoffice/dashboard")}
-            >
-              <ChartColumn /> Backoffice
-            </Button>
-          ) : (
-            <></>
-          )}
           <Button
             variant={"link"}
             className="w-full"

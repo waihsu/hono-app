@@ -2,14 +2,16 @@ import BackofficeLayout from "@/components/backoffice-layout";
 import Heading from "@/components/Heading";
 import { Link } from "react-router-dom";
 
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import MatchCard from "../matches/match-card";
-import { useTokenStore } from "@/store/use-bear-store";
 
 export default function BettingMarketsByMatch() {
-  const { matches } = useAppStore();
-  const { user } = useTokenStore();
-  const AdminByMatches = matches.filter((match) => match.user_id === user?.id);
+  const { matches, publishMatches } = useAdminStore();
+
+  const validMatches = (matchId: string) => {
+    return matches.find((item) => item.id === matchId);
+  };
+
   return (
     <BackofficeLayout>
       <Heading
@@ -18,12 +20,16 @@ export default function BettingMarketsByMatch() {
         name="Betting Markets"
       />
       <div className=" grid md:grid-cols-1 lg:grid-cols-2 gap-2">
-        {AdminByMatches &&
-          AdminByMatches.map((item) => (
-            <Link to={`/backoffice/bettingMarkets/${item.id}`} key={item.id}>
-              <MatchCard match={item} />
-            </Link>
-          ))}
+        {publishMatches &&
+          publishMatches.map((item) => {
+            const match = validMatches(item.match_id);
+            if (!match) return null;
+            return (
+              <Link to={`/bettingMarkets/${item.id}`} key={item.id}>
+                <MatchCard match={match} />
+              </Link>
+            );
+          })}
       </div>
     </BackofficeLayout>
   );

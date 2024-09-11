@@ -10,7 +10,7 @@ export default function BackofficeDashboard() {
       <Heading button description="" name="Dashboard" />
       <div>
         <div className="grid grid-cols-3 gap-4">
-          <Link to={"/backoffice/customers"}>
+          <Link to={"/customers"}>
             <BackofficeItemCard
               icon={
                 <Users className="h-4 w-4 md:h-8 md:w-8 text-muted-foreground" />
@@ -19,7 +19,7 @@ export default function BackofficeDashboard() {
               value="1000"
             />
           </Link>
-          <Link to={"/backoffice/bets"}>
+          <Link to={"/bets"}>
             <BackofficeItemCard
               icon={
                 <CreditCard className="h-4 w4 md:h-8 md:w-8 text-muted-foreground" />
@@ -28,7 +28,7 @@ export default function BackofficeDashboard() {
               value="300"
             />
           </Link>
-          <Link to={"/backoffice/transations"}>
+          <Link to={"/transations"}>
             <BackofficeItemCard
               icon={
                 <ArrowLeftRight className="h-4 w4 md:h-8 md:w-8 text-muted-foreground" />

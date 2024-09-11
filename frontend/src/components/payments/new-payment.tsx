@@ -17,7 +17,7 @@ export default function NewPayment() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/payments`}
+            to={`/payments`}
           >
             <ArrowLeft /> Back
           </Link>

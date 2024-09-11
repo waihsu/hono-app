@@ -14,6 +14,9 @@ import admin from "./admin";
 import bets from "./bets";
 import payments from "./payments";
 import transactions from "./transations";
+import runningleagues from "./runningleagues";
+import profile from "./profile";
+import publishmatches from "./publish-matches";
 
 const api = new Hono();
 
@@ -28,6 +31,9 @@ api.route("/odds", odds);
 api.route("/bets", bets);
 api.route("/payments", payments);
 api.route("/transactions", transactions);
+api.route("/runningleagues", runningleagues);
+api.route("/profiles", profile);
+api.route("/publish", publishmatches);
 
 // App Data
 api.get("/appData/:userId", async (c) => {
@@ -57,8 +63,8 @@ api.get("/appData/:userId", async (c) => {
       },
     });
     const payments = await prisma.payment.findMany();
-    const users = await prisma.user.findMany({
-      where: { user_role: "ADMIN" },
+    const admins = await prisma.user.findMany({
+      where: { user_role: { not: "USER" } },
     });
     const userBets = await prisma.bets.findMany({
       where: { user_id: userId },
@@ -67,6 +73,7 @@ api.get("/appData/:userId", async (c) => {
     const transactions = await prisma.transactions.findMany({
       where: { user_id: userId },
     });
+    const publishMatches = await prisma.publishMatch.findMany();
     const currentUser = await prisma.user.findFirst({
       where: { id: userId },
       select: {
@@ -86,7 +93,7 @@ api.get("/appData/:userId", async (c) => {
       bettingMarkets,
       odds,
       payments,
-      admins: users.map((item) => ({
+      admins: admins.map((item) => ({
         id: item.id,
         username: item.username,
         email: item.email,
@@ -96,6 +103,7 @@ api.get("/appData/:userId", async (c) => {
       userBets,
       transactions,
       currentUser,
+      publishMatches,
     });
   } catch (err) {
     console.log(err);
@@ -104,14 +112,56 @@ api.get("/appData/:userId", async (c) => {
 });
 
 // Login
-api.post("/login", async (c) => {
+api.post("/admin/login", async (c) => {
   try {
     const { email, password }: { email: string; password: string } =
       await c.req.json();
     if (!email || !password) return c.json({ messg: "Form not valid" }, 403);
     // console.log(email, password);
-    const existEmail = await prisma.user.findUnique({ where: { email } });
-    // console.log(existEmail);
+    const existAdmin = await prisma.user.findUnique({
+      where: { email, user_role: { not: "USER" } },
+    });
+    console.log(existAdmin);
+    if (!existAdmin) return c.json({ messg: "Email does not exist" }, 403);
+    const validPassword = Bun.password.verifySync(
+      password,
+      existAdmin.password_hash
+    );
+    // console.log(validPassword);
+
+    if (!validPassword) return c.json({ messg: "Wrong Password" }, 403);
+
+    const payload = {
+      sub: existAdmin.id,
+      role: existAdmin.user_role,
+      exp: Math.floor(Date.now() / 1000) + 60 * 5000, // Token expires in 5 minutes
+    };
+
+    const token = await sign(payload, process.env.JWT_SECRET!);
+    // console.log(token);
+    const user = {
+      id: existAdmin.id,
+      username: existAdmin.username,
+      email: existAdmin.email,
+      balance: existAdmin.balance,
+      user_role: existAdmin.user_role,
+    };
+    return c.json({ user, token });
+  } catch (err) {
+    return c.json({ messg: "error" }, 405);
+  }
+});
+
+api.post("/user/login", async (c) => {
+  try {
+    const { email, password }: { email: string; password: string } =
+      await c.req.json();
+    if (!email || !password) return c.json({ messg: "Form not valid" }, 403);
+    // console.log(email, password);
+    const existEmail = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!existEmail) return c.json({ messg: "Email does not exist" }, 403);
     const validPassword = Bun.password.verifySync(
       password,
@@ -134,7 +184,7 @@ api.post("/login", async (c) => {
       username: existEmail.username,
       email: existEmail.email,
       balance: existEmail.balance,
-      role: existEmail.user_role,
+      user_role: existEmail.user_role,
     };
     return c.json({ user, token });
   } catch (err) {

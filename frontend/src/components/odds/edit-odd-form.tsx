@@ -17,6 +17,7 @@ import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
 import SelectCountryLeague from "../select-country-league";
 import { Odd } from "@/types/types";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   id: z.string(),
@@ -29,15 +30,16 @@ const formSchema = z.object({
 export default function EditOddForm({
   odd,
   data,
+  ws,
 }: {
   odd: Odd;
   data: { id: string; name: string }[];
+  ws: WebSocket;
 }) {
-  const socket = new WebSocket(`/ws/actions?type=editodd`);
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState(odd.team_id);
-
+  const { updateOdd } = useAdminStore();
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,7 +72,14 @@ export default function EditOddForm({
       toast({ title: messg, variant: "destructive" });
     } else {
       const { updatedOdd } = data;
-      socket.send(JSON.stringify(updatedOdd));
+      updateOdd(updatedOdd);
+      ws.send(
+        JSON.stringify({
+          type: "editodd",
+          message: updatedOdd,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }

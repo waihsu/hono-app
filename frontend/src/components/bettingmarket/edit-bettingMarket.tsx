@@ -5,12 +5,12 @@ import BackofficeLayout from "@/components/backoffice-layout";
 import Heading from "@/components/Heading";
 import { Button } from "@/components/ui/button";
 import EditBettingMarketForm from "./edit-betting-market-form";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 
 export default function EditBettingMarket() {
   const navigate = useNavigate();
   const { bettingMarketId } = useParams();
-  const { bettingMarkets } = useAppStore();
+  const { bettingMarkets } = useAdminStore();
   const validBettingMarket = bettingMarkets.find(
     (item) => item.id === bettingMarketId
   );

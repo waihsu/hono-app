@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Edit, PlusCircle, Trash } from "lucide-react";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import MatchCard from "../matches/match-card";
 
 import {
@@ -21,12 +21,23 @@ import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
 
 export default function BettingMarket() {
-  const socket = new WebSocket(`/ws/actions?type=deleteBettingMarket`);
-  const { matchId } = useParams();
+  const { publishMatchId } = useParams();
   const navigate = useNavigate();
-  const { matches, bettingMarkets, odds } = useAppStore();
+  const {
+    matches,
+    bettingMarkets,
+    odds,
+    publishMatches,
+    ws,
+    removeBettingMarket,
+  } = useAdminStore();
+  const validPublishMatch = publishMatches.find(
+    (item) => item.id === publishMatchId
+  );
   const { token } = useTokenStore();
-  const validMatch = matches.find((item) => item.id === matchId);
+  const validMatch = matches.find(
+    (item) => item.id === validPublishMatch?.match_id
+  );
   if (!validMatch) return null;
   const home_team_id = validMatch.home_team_id;
   const away_team_id = validMatch.away_team_id;
@@ -46,13 +57,15 @@ export default function BettingMarket() {
   };
 
   const validBettingMarkets = bettingMarkets.filter(
-    (item) => item.match_id === matchId
+    (item) => item.publish_match_id === validPublishMatch?.id
   );
 
   const onDelete = async (bettingMarketId: string) => {
+    if (!ws) return;
     const resp = await fetch(`/api/bettingmarkets/${bettingMarketId}`, {
       method: "DELETE",
       headers: {
+        "Content-Type": "application/json",
         Bearer: token,
       },
     });
@@ -64,7 +77,14 @@ export default function BettingMarket() {
     } else {
       const { deletedBettingMarket } = data;
       // console.log(deletedBettingMarket);
-      socket.send(JSON.stringify(deletedBettingMarket));
+      removeBettingMarket(deletedBettingMarket);
+      ws.send(
+        JSON.stringify({
+          type: "deleteBettingMarket",
+          message: deletedBettingMarket,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   };
@@ -78,7 +98,7 @@ export default function BettingMarket() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/bettingMarket/${matchId}/newbettingmarket`}
+            to={`/bettingMarket/${validPublishMatch?.id}/newbettingmarket`}
           >
             <PlusCircle /> New Market
           </Link>
@@ -90,7 +110,7 @@ export default function BettingMarket() {
         <Button
           variant={"outline"}
           className="flex items-center gap-x-2 mb-3"
-          onClick={() => navigate(`/backoffice/bettingMarkets`)}
+          onClick={() => navigate(`/bettingMarkets`)}
         >
           <ArrowLeft /> Back
         </Button>
@@ -113,26 +133,32 @@ export default function BettingMarket() {
                     <AccordionTrigger className="flex items-center justify-between gap-2">
                       <Link
                         className="text-xl sm:text-2xl"
-                        to={`/backoffice/odds/${matchId}/${item.id}?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`}
+                        to={`/odds/${validPublishMatch?.id}/${item.id}?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`}
                       >
                         {item.market_type}
                       </Link>
                       <div className="flex items-center gap-2 mr-auto ">
-                        <Button
-                          size={"icon"}
-                          variant={"outline"}
+                        <div
+                          className={cn(
+                            buttonVariants({ size: "sm", variant: "outline" })
+                          )}
                           onClick={() =>
-                            navigate(
-                              `/backoffice/bettingMarket/edit/${item.id}`
-                            )
+                            navigate(`/bettingMarket/edit/${item.id}`)
                           }
                         >
                           <Edit />
-                        </Button>
+                        </div>
                         <DeleteDialog onDelete={() => onDelete(item.id)}>
-                          <Button size={"icon"} variant={"destructive"}>
+                          <div
+                            className={cn(
+                              buttonVariants({
+                                size: "icon",
+                                variant: "destructive",
+                              })
+                            )}
+                          >
                             <Trash />
-                          </Button>
+                          </div>
                         </DeleteDialog>
                       </div>
                     </AccordionTrigger>
@@ -145,7 +171,7 @@ export default function BettingMarket() {
                           className=" ml-auto items-end"
                           onClick={() =>
                             navigate(
-                              `/backoffice/odds/${matchId}/${item.id}/new?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`
+                              `/odds/${validPublishMatch?.id}/${item.id}/new?away_id=${validMatch.away_team_id}&home_id=${validMatch.home_team_id}`
                             )
                           }
                         >

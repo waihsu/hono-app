@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowLeft, Flag } from "lucide-react";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { toast } from "../ui/use-toast";
 import DeleteDialog from "../delete-dialog";
 import EditCountryForm from "./edit-country-form";
@@ -15,7 +15,7 @@ export default function EditCountry() {
   const { id } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { countries, removeCountry } = useAppStore();
+  const { countries, removeCountry } = useAdminStore();
   const validCountry = countries.find((item) => item.id === id);
   if (!validCountry) return null;
   const onDelete = async () => {
@@ -36,7 +36,7 @@ export default function EditCountry() {
       console.log(deletedCountry);
       removeCountry(deletedCountry);
       toast({ title: "successful" });
-      navigate("/backoffice/countries");
+      navigate("/countries");
     }
   };
   return (
@@ -48,7 +48,7 @@ export default function EditCountry() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/countries`}
+            to={`/countries`}
           >
             <ArrowLeft /> Back
           </Link>

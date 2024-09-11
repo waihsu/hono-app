@@ -7,11 +7,11 @@ import { buttonVariants } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
 
 import EditPaymentForm from "./edit-payment-form";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 
 export default function EditPayment() {
   const { paymentId } = useParams();
-  const { payments } = useAppStore();
+  const { payments } = useAdminStore();
   const validPayment = payments.find((item) => item.id === paymentId);
   if (!validPayment) return null;
   return (
@@ -23,7 +23,7 @@ export default function EditPayment() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/payments`}
+            to={`/payments`}
           >
             <ArrowLeft /> Back
           </Link>

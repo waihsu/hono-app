@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import AdminNav from "./admin-nav";
 import AdminFooter from "./admin-footer";
-import { useAdminStore } from "@/store/use-admin-store";
 import { useTokenStore } from "@/store/use-bear-store";
 import { Navigate } from "react-router-dom";
 import { adminNav, sidebarNav } from "@/lib/data";
@@ -12,33 +11,10 @@ export default function BackofficeLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const socket = new WebSocket(`ws://localhost:3000/admin`);
-  const { getAdminAppData, addBet, setOnlineUserIds, addTransation } =
-    useAdminStore();
-  const { token, user } = useTokenStore();
+  const { user } = useTokenStore();
 
-  useEffect(() => {
-    socket.onmessage = (ev) => {
-      const { type, payload } = JSON.parse(ev.data);
-      if (type === "onlineusers") {
-        // console.log(payload);
-        setOnlineUserIds(payload);
-      } else if (type === `newbet${user?.id}`) {
-        // console.log("payload", payload);
-        addBet(JSON.parse(payload));
-      } else if (type === `tran${user?.id}`) {
-        addTransation(JSON.parse(payload));
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (token) {
-      getAdminAppData({ token, userId: String(user?.id) });
-    }
-  }, []);
   if (!user) return null;
-  if (user.role === "SUPERADMIN") {
+  if (user.user_role === "SUPERADMIN") {
     return (
       <div>
         <AdminNav sidebarNav={sidebarNav} user={user} />
@@ -48,7 +24,7 @@ export default function BackofficeLayout({
         </div>
       </div>
     );
-  } else if (user.role === "ADMIN") {
+  } else if (user.user_role === "ADMIN") {
     return (
       <div>
         <AdminNav user={user} sidebarNav={adminNav} />

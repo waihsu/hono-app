@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
 import SelectCountryLeague from "../select-country-league";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   betting_market_id: z.string(),
@@ -32,9 +33,10 @@ export default function NewOddForm({
   data: { id: string; name: string }[];
 }) {
   const { token } = useTokenStore();
+  const { addOdd, ws } = useAdminStore();
   const [loading, setLoading] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState("");
-  const socket = new WebSocket(`/ws/actions?type=newodd`);
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +50,7 @@ export default function NewOddForm({
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ws) return;
     values.team_id = selectedTeamId;
     setLoading(true);
     const resp = await fetch("/api/odds", {
@@ -66,8 +69,11 @@ export default function NewOddForm({
       toast({ title: messg, variant: "destructive" });
     } else {
       const { newOdd } = data;
-      console.log(newOdd);
-      socket.send(JSON.stringify(newOdd));
+      // console.log(newOdd);
+      addOdd(newOdd);
+      ws.send(
+        JSON.stringify({ type: "newodd", message: newOdd, sendTo: "client" })
+      );
       toast({ title: "successful" });
     }
   }

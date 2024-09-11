@@ -4,13 +4,13 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, PlusCircle } from "lucide-react";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import OddCard from "./odd-card";
 
 export default function Odds() {
   const { bettingMarketId, matchId } = useParams();
   const location = useLocation();
-  const { bettingMarkets, odds, teams } = useAppStore();
+  const { bettingMarkets, odds, teams } = useAdminStore();
   const validBettingMarket = bettingMarkets.find(
     (item) => item.id === bettingMarketId
   );
@@ -40,7 +40,7 @@ export default function Odds() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/odds/${matchId}/${bettingMarketId}/new?away_id=${away_team_id}&home_id=${home_team_id}`}
+            to={`/odds/${matchId}/${bettingMarketId}/new?away_id=${away_team_id}&home_id=${home_team_id}`}
           >
             <PlusCircle /> New Odd
           </Link>
@@ -53,7 +53,7 @@ export default function Odds() {
           buttonVariants({ size: "sm" })
           // "flex items-center gap-x-2"
         )}
-        to={`/backoffice/bettingMarkets/${matchId}`}
+        to={`/bettingMarkets/${matchId}`}
       >
         <ArrowLeft /> Back
       </Link>
@@ -66,7 +66,7 @@ export default function Odds() {
             {homeOdds &&
               homeOdds.map((item) => (
                 <Link
-                  to={`/backoffice/odds/${item.id}?away_id=${away_team_id}&home_id=${home_team_id}`}
+                  to={`/odds/${item.id}?away_id=${away_team_id}&home_id=${home_team_id}`}
                   key={item.id}
                 >
                   <OddCard odd={item} />
@@ -82,7 +82,7 @@ export default function Odds() {
             {awayOdds &&
               awayOdds.map((item) => (
                 <Link
-                  to={`/backoffice/odds/${item.id}?away_id=${away_team_id}&home_id=${home_team_id}`}
+                  to={`/odds/${item.id}?away_id=${away_team_id}&home_id=${home_team_id}`}
                   key={item.id}
                 >
                   <OddCard odd={item} />

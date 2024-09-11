@@ -16,30 +16,31 @@ import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "@/components/ui/use-toast";
 import { useParams } from "react-router-dom";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
-  match_id: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
+  publish_match_id: z.string(),
   market_type: z.string(),
 });
 
 export default function BettingMarketForm() {
-  const { matchId } = useParams();
+  const { publishMatchId } = useParams();
   const { token } = useTokenStore();
+  const { addBettingMarket, ws } = useAdminStore();
   const [loading, setLoading] = useState(false);
-  const socket = new WebSocket(`/ws/actions?type=newbettingmarket`);
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      match_id: matchId,
+      publish_match_id: publishMatchId,
       market_type: "",
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ws) return;
     setLoading(true);
     const resp = await fetch("/api/bettingmarkets", {
       method: "POST",
@@ -57,8 +58,14 @@ export default function BettingMarketForm() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { newBettingMarket } = data;
-      // console.log(newBettingMarket);
-      socket.send(JSON.stringify(newBettingMarket));
+      addBettingMarket(newBettingMarket);
+      ws.send(
+        JSON.stringify({
+          type: "newbettingmarket",
+          message: newBettingMarket,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }

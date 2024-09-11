@@ -1,23 +1,39 @@
 import BackofficeLayout from "@/components/backoffice-layout";
 import Heading from "@/components/Heading";
-import { useAdminStore } from "@/store/use-admin-store";
 import { betColumns } from "./bet-columns";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { Match } from "@/types/types";
 import { useTokenStore } from "@/store/use-bear-store";
 import { DataTable } from "../data-table";
+import { Button } from "../ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Bets() {
-  const { bets, users } = useAdminStore();
-  const { matches, bettingMarkets, teams, odds } = useAppStore();
-  const { token } = useTokenStore();
-  // console.log(bets);
-
+  const {
+    matches,
+    bettingMarkets,
+    teams,
+    odds,
+    bets,
+    users,
+    ws,
+    publishMatches,
+  } = useAdminStore();
+  const { token, user: CurrentUser } = useTokenStore();
+  const navigate = useNavigate();
+  console.log(bets);
   const validMatch = (bettingMarketId: string) => {
-    const validMatchId = bettingMarkets.find(
+    const bettingMarket = bettingMarkets.find(
       (item) => item.id === bettingMarketId
-    )?.match_id;
-    const match = matches.find((item) => item.id === validMatchId) as Match;
+    );
+    const publishMatch = publishMatches.find(
+      (item) => item.id === bettingMarket?.publish_match_id
+    );
+
+    const match = matches.find(
+      (item) => item.id === publishMatch?.match_id
+    ) as Match;
     const validHomeTeam = teams.find((item) => item.id === match?.home_team_id);
     const validAwayTeam = teams.find((item) => item.id === match?.away_team_id);
     return { validAwayTeam, validHomeTeam, match };
@@ -35,10 +51,12 @@ export default function Bets() {
   // betId,user,status,amount,match,
   const testBets = bets.map((item) => ({
     token: token,
+    ws: ws,
     id: item.id,
+    admin_id: CurrentUser?.id,
     user: validUser(item.user_id),
     email: validUser(item.user_id)?.email as string,
-    status: item.bet_status as string,
+    status: item.bet_status,
     amount: item.amount,
     match: validMatch(item.betting_market_id),
     odd: validOdd(item.odd_id),
@@ -46,7 +64,15 @@ export default function Bets() {
   }));
   return (
     <BackofficeLayout>
-      <Heading button description="Bet Lists" name="Bets" />
+      <Heading
+        button={
+          <Button onClick={() => navigate("/dashboard")}>
+            <ArrowLeft /> Back
+          </Button>
+        }
+        description="Bet Lists"
+        name="Bets"
+      />
       <div>
         <DataTable columns={betColumns} data={testBets} />
       </div>

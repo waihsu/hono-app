@@ -1,9 +1,9 @@
 import AdminMobileNav from "./admin-mobile-nav";
-import NavLink from "./nav-link";
 import { DropdownProfile } from "./DropDownProfile";
 import { User } from "@/store/use-bear-store";
 import { Link } from "react-router-dom";
 import { LucideProps } from "lucide-react";
+import NavLink from "./nav-link";
 
 interface AdminNavProps {
   sidebarNav: {

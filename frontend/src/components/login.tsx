@@ -23,6 +23,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "./ui/use-toast";
 import { useTokenStore } from "@/store/use-bear-store";
 import { useState } from "react";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   email: z.string().min(2).max(50),
@@ -31,6 +32,7 @@ const formSchema = z.object({
 
 export function Login() {
   const { addToken, setUser } = useTokenStore();
+  const { getAppData } = useAdminStore();
   const nevigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,7 +44,7 @@ export function Login() {
   });
   const onLogin = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
-    const resp = await fetch("/api/login", {
+    const resp = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
@@ -56,8 +58,9 @@ export function Login() {
       const { user, token } = await resp.json();
       addToken(token);
       setUser(user);
+      getAppData({ token, userId: user.id });
       toast({ title: "successful" });
-      nevigate("/");
+      nevigate("/dashboard");
     }
   };
   return (

@@ -23,10 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   id: z.string(),
-  match_id: z.string().min(2, {
+  publish_match_id: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   market_type: z.string(),
@@ -38,15 +39,15 @@ export default function EditBettingMarketForm({
 }: {
   bettingMarket: BettingMarket;
 }) {
+  const { ws, updateBettingMarket } = useAdminStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
-  const socket = new WebSocket(`/ws/actions?type=newbettingmarket`);
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: bettingMarket.id,
-      match_id: bettingMarket.match_id,
+      publish_match_id: bettingMarket.publish_match_id,
       market_type: bettingMarket.market_type,
       market_status: bettingMarket.market_status,
     },
@@ -54,6 +55,7 @@ export default function EditBettingMarketForm({
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ws) return;
     setLoading(true);
     const resp = await fetch("/api/bettingmarkets", {
       method: "PUT",
@@ -70,9 +72,16 @@ export default function EditBettingMarketForm({
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { newBettingMarket } = data;
-      // console.log(newBettingMarket);
-      socket.send(JSON.stringify(newBettingMarket));
+      const { updatedBettingMarket } = data;
+
+      ws.send(
+        JSON.stringify({
+          type: "editbettingmarket",
+          message: updatedBettingMarket,
+          sendTo: "client",
+        })
+      );
+      updateBettingMarket(updatedBettingMarket);
       toast({ title: "successful" });
     }
   }

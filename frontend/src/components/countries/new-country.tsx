@@ -17,7 +17,7 @@ export default function NewCountry() {
               buttonVariants({ variant: "outline" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/countries`}
+            to={`/countries`}
           >
             <ArrowLeft /> Back
           </Link>

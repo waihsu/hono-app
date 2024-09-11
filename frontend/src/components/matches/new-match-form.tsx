@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import SelectCountryLeague from "../select-country-league";
 import { DateTimePicker } from "../date-time-picker";
 import { Label } from "../ui/label";
@@ -18,8 +18,8 @@ import { Label } from "../ui/label";
 // });
 
 export default function NewMatchForm() {
-  const { teams } = useAppStore();
-  const { token, user } = useTokenStore();
+  const { teams, ws } = useAdminStore();
+  const { token } = useTokenStore();
   const [matchDate, setMatchDate] = useState<Date | undefined>(undefined);
 
   const [homeTeamId, setHomeTeamId] = useState<string>("");
@@ -27,10 +27,13 @@ export default function NewMatchForm() {
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
-  const socket = new WebSocket(`/ws/actions?type=newmatch`);
+  // const socket = new WebSocket(
+  //   `ws://localhost:3000/ws?type=admin&userId=${user?.id}`
+  // );
   // 2. Define a submit handler.
   async function onSubmit() {
     console.log("clicked");
+    if (!ws) return toast({ title: "ws connecting.." });
 
     setLoading(true);
     const resp = await fetch(`/api/matches`, {
@@ -43,7 +46,6 @@ export default function NewMatchForm() {
         homeTeamId,
         awayTeamId,
         matchDate,
-        adminId: user?.id,
       }),
     });
     setLoading(false);
@@ -56,7 +58,13 @@ export default function NewMatchForm() {
       const { newMatch } = data;
       // console.log(newMatch);
       // addMatch(newMatch);
-      socket.send(JSON.stringify(newMatch));
+      ws.send(
+        JSON.stringify({
+          type: "creatematch",
+          message: newMatch,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }

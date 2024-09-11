@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   admin_id: z.string(),
@@ -30,9 +31,7 @@ const formSchema = z.object({
 });
 
 export default function NewPaymentForm() {
-  const socket = new WebSocket(
-    `ws://localhost:3000/ws/actions?type=newpayment`
-  );
+  const { ws, addPayment } = useAdminStore();
   const { token, user } = useTokenStore();
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
@@ -48,6 +47,7 @@ export default function NewPaymentForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ws) return;
     setLoading(true);
     const resp = await fetch("/api/payments", {
       method: "POST",
@@ -65,8 +65,14 @@ export default function NewPaymentForm() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { newPayment } = data;
-      // console.log(newPayment);
-      socket.send(JSON.stringify(newPayment));
+      addPayment(newPayment);
+      ws.send(
+        JSON.stringify({
+          type: "newpayment",
+          message: newPayment,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }

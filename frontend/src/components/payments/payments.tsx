@@ -19,7 +19,7 @@ export default function Payments() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/payments/new`}
+            to={`/payments/new`}
           >
             <PlusCircle /> New Payment
           </Link>
@@ -32,7 +32,7 @@ export default function Payments() {
           <PaymentCard
             key={payment.id}
             payment={payment}
-            href={`/backoffice/payments/${payment.id}`}
+            href={`/payments/${payment.id}`}
           />
         ))}
       </div>

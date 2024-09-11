@@ -36,6 +36,8 @@ import DeleteDialog from "../delete-dialog";
 interface ColumnType {
   token: string;
   id: string;
+  admin_id: string | undefined;
+  ws: WebSocket | null;
   status: string;
   user: User | undefined;
   email: string;
@@ -165,10 +167,8 @@ export const betColumns: ColumnDef<ColumnType>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const { status, id, token, user } = row.original;
-      const socket = new WebSocket(
-        `ws://localhost:3000/ws/actions?type=${user?.id}`
-      );
+      const { status, id, token, user, ws, admin_id } = row.original;
+
       async function updateStatus({
         betId,
         status,
@@ -176,7 +176,7 @@ export const betColumns: ColumnDef<ColumnType>[] = [
         betId: string;
         status: string;
       }) {
-        if (!betId || !status)
+        if (!betId || !status || !ws)
           return toast({
             title: "All fields must be fill.",
             variant: "destructive",
@@ -194,7 +194,15 @@ export const betColumns: ColumnDef<ColumnType>[] = [
           toast({ title: messg, variant: "destructive" });
         } else {
           const { updatedBet } = await resp.json();
-          socket.send(JSON.stringify(updatedBet));
+          ws.send(
+            JSON.stringify({
+              type: "betstatus",
+              message: updatedBet,
+              sendTo: "client",
+              receiverId: user?.id,
+              senderId: admin_id,
+            })
+          );
           toast({ title: "successful" });
         }
       }

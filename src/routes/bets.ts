@@ -13,7 +13,7 @@ bets.post("/", async (c) => {
     if (!token) return c.json({ messg: "Unauthorized" }, 401);
 
     const isAuth = await verify(token, process.env.JWT_SECRET!);
-    if (!isAuth) return c.json({ messg: "Please Login Again" }, 418);
+    if (!isAuth) return c.json({ messg: "Please Login Again" }, 403);
 
     const {
       user_id,
@@ -71,7 +71,7 @@ bets.put("/status", async (c) => {
     if (!isAuth) return c.json({ messg: "Please Login Again" }, 418);
     const { betId, status }: { betId: string; status: $Enums.Bet_Status } =
       await c.req.json();
-    if (!betId || !status) return c.json({ messg: "Form not valid" }, 418);
+    if (!betId || !status) return c.json({ messg: "Form not valid" }, 403);
 
     const updatedBet = await prisma.bets.update({
       where: { id: betId },

@@ -1,12 +1,12 @@
 import React from "react";
 import { Card } from "../ui/card";
 import { Match } from "@/types/types";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { format } from "date-fns";
 import RemainTime from "../remain-time";
 
 export default function MatchCard({ match }: { match: Match }) {
-  const { teams } = useAppStore();
+  const { teams } = useAdminStore();
   const homeTeam = teams.find((item) => item.id === match.home_team_id);
   const awayTeam = teams.find((item) => item.id === match.away_team_id);
   //   console.log(match.match_date);
@@ -16,7 +16,7 @@ export default function MatchCard({ match }: { match: Match }) {
         <div className="grid grid-cols-3  w-full  my-4 sm:gap-3 ">
           <div className="flex w-full justify-center items-center gap-2">
             <p className="text-xs sm:text-sm text-center  text-pretty">
-              {homeTeam?.name}
+              {homeTeam?.shortName}
             </p>
 
             <img
@@ -40,7 +40,7 @@ export default function MatchCard({ match }: { match: Match }) {
               className="w-6 h-6 sm:w-8 sm:h-8 object-center"
             />
             <p className="text-wrap text-center text-xs sm:text-sm">
-              {awayTeam?.name}
+              {awayTeam?.shortName}
             </p>
           </div>
         </div>

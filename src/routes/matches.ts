@@ -22,27 +22,24 @@ matches.post("/", async (c) => {
       homeTeamId,
       awayTeamId,
       matchDate,
-      adminId,
     }: {
       homeTeamId: string;
       awayTeamId: string;
       matchDate: string;
-      adminId: string;
     } = await c.req.json();
-    if (!homeTeamId || !awayTeamId || !matchDate || !adminId)
+    if (!homeTeamId || !awayTeamId || !matchDate)
       return Response.json({ messg: "Form not valid" }, { status: 403 });
     const newMatch = await prisma.matches.create({
       data: {
         home_team_id: homeTeamId,
         away_team_id: awayTeamId,
         match_date: matchDate,
-        user_id: adminId,
       },
     });
     return c.json({ newMatch });
   } catch (err) {
     console.log(err);
-    return c.json({ messg: "Error" }, 403);
+    return c.json({ messg: "Error" }, 405);
   }
 });
 
@@ -60,12 +57,18 @@ matches.put("/:id", async (c) => {
       awayTeamId,
       matchDate,
       matchStatus,
+      hometTeamScore,
+      awayTeamScore,
     }: {
       homeTeamId: string;
       awayTeamId: string;
       matchDate: string;
       matchStatus: Match_Status;
+      hometTeamScore: number;
+      awayTeamScore: number;
     } = await c.req.json();
+    if (!Number(hometTeamScore) || !Number(awayTeamScore))
+      return c.json({ messg: "Team Score must be number" });
     const updatedMatch = await prisma.matches.update({
       where: { id },
       data: {
@@ -73,6 +76,8 @@ matches.put("/:id", async (c) => {
         away_team_id: awayTeamId,
         match_date: matchDate,
         match_status: matchStatus,
+        home_team_score: hometTeamScore,
+        away_team_scroe: awayTeamScore,
       },
     });
     return c.json({ updatedMatch });

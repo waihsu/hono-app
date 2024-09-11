@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowLeft, Flag } from "lucide-react";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { toast } from "../ui/use-toast";
 import DeleteDialog from "../delete-dialog";
 import EditMatchForm from "./edit-match-form";
@@ -15,10 +15,9 @@ export default function EditMatch() {
   const { id } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { matches } = useAppStore();
-  const socket = new WebSocket(`/ws/actions?type=removematch`);
+  const { matches, ws } = useAdminStore();
   const match = matches.find((item) => item.id === id);
-  if (!match) return null;
+  if (!match || !ws) return null;
   const onDelete = async () => {
     const resp = await fetch(`/api/matches/${id}`, {
       method: "DELETE",
@@ -35,9 +34,15 @@ export default function EditMatch() {
     } else {
       const { deletedMatch } = data;
       console.log(deletedMatch);
-      socket.send(JSON.stringify(deletedMatch));
+      ws.send(
+        JSON.stringify({
+          type: "deletematch",
+          message: deletedMatch,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
-      navigate("/backoffice/matches");
+      navigate("/matches");
     }
   };
   return (
@@ -49,7 +54,7 @@ export default function EditMatch() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/matches`}
+            to={`/matches`}
           >
             <ArrowLeft /> Back
           </Link>
@@ -68,7 +73,7 @@ export default function EditMatch() {
             onDelete={onDelete}
           />
         </div>
-        <EditMatchForm match={match} />
+        <EditMatchForm match={match} ws={ws} />
       </div>
     </BackofficeLayout>
   );

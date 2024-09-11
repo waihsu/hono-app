@@ -13,9 +13,24 @@ leagues.post("/", async (c) => {
 
     const { role } = await verify(token, process.env.JWT_SECRET!);
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
-    const { name }: { name: string } = await c.req.json();
-    if (!name) return c.json({ messg: "Form not valid" }, 403);
-    const newLeague = await prisma.leagues.create({ data: { name } });
+    const {
+      name,
+      code,
+      image_url,
+      type,
+      country_id,
+    }: {
+      name: string;
+      code: string;
+      image_url: string;
+      type: string;
+      country_id: string;
+    } = await c.req.json();
+    if (!name || !code || !image_url || type || country_id)
+      return c.json({ messg: "Form not valid" }, 403);
+    const newLeague = await prisma.leagues.create({
+      data: { name, code, image_url, type, country_id },
+    });
     return c.json({ newLeague });
   } catch (err) {
     console.log(err);

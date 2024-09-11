@@ -77,13 +77,15 @@ transactions.put("/", async (c) => {
       where: { id: transationId },
     });
     if (!existTransaction)
-      return c.json({ messg: "This transaction does not exist" }, 418);
+      return c.json({ messg: "This transaction does not exist" }, 403);
+    if (existTransaction.transation_status === "COMPLETED")
+      return c.json({ messg: "It's complicated bro!" }, 403);
     const existUserBalance = await prisma.user.findFirst({
       where: { id: existTransaction.user_id },
       select: { balance: true },
     });
     if (!existUserBalance)
-      return c.json({ messg: "User Balance does not exist" }, 418);
+      return c.json({ messg: "User Balance does not exist" }, 403);
 
     if (status === "COMPLETED") {
       const updatedTransatrion = await prisma.transactions.update({
@@ -110,7 +112,7 @@ transactions.put("/", async (c) => {
       where: { id: transationId },
       data: { transation_status: status },
     });
-    return c.json({ messg: "Updated" }, 418);
+    return c.json({ updatedTransatrion });
   } catch (err) {
     console.log(err);
     return c.json({ messg: "Error" }, 405);

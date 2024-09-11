@@ -5,20 +5,20 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import { ArrowLeft, Flag } from "lucide-react";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { toast } from "../ui/use-toast";
 import DeleteDialog from "../delete-dialog";
 import EditTeamForm from "./edit-team-form";
 
 export default function EditTeam() {
-  const { id } = useParams();
+  const { teamId } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { teams, removeTeam } = useAppStore();
-  const validTeam = teams.find((item) => item.id === id);
+  const { teams, removeTeam } = useAdminStore();
+  const validTeam = teams.find((item) => item.id === teamId);
   if (!validTeam) return null;
   const onDelete = async () => {
-    const resp = await fetch(`/api/teams/${id}`, {
+    const resp = await fetch(`/api/teams/${teamId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -31,11 +31,11 @@ export default function EditTeam() {
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { deletedCountry } = data;
-      console.log(deletedCountry);
-      removeTeam(deletedCountry);
+      const { deletedTeam } = data;
+      console.log(deletedTeam);
+      removeTeam(deletedTeam);
       toast({ title: "successful" });
-      navigate("/backoffice/countries");
+      navigate("/teams");
     }
   };
   return (
@@ -47,7 +47,7 @@ export default function EditTeam() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/teams`}
+            to={`/teams`}
           >
             <ArrowLeft /> Back
           </Link>
@@ -66,7 +66,7 @@ export default function EditTeam() {
             onDelete={onDelete}
           />
         </div>
-        <div className=" max-w-lg">
+        <div className="container">
           <EditTeamForm team={validTeam} />
         </div>
       </div>

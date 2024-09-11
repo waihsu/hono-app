@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 import { PlusCircle } from "lucide-react";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import LeagueCard from "./league-card";
 
 export default function Leagues() {
-  const { leagues } = useAppStore();
+  const { leagues } = useAdminStore();
   console.log(leagues);
   return (
     <BackofficeLayout>
@@ -20,7 +20,7 @@ export default function Leagues() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/leagues/new`}
+            to={`/leagues/new`}
           >
             <PlusCircle /> New League
           </Link>
@@ -28,11 +28,11 @@ export default function Leagues() {
         description="leagues"
         name="Leagues"
       />
-      <div className=" grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+      <div className="container grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
         {leagues &&
           leagues.map((item) => (
-            <Link to={`/backoffice/leagues/${item.id}`} key={item.id}>
-              <LeagueCard name={item.name} />
+            <Link to={`/leagues/${item.id}`} key={item.id}>
+              <LeagueCard name={item.name} image_url={item.image_url} />
             </Link>
           ))}
       </div>

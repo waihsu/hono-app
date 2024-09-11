@@ -1,5 +1,5 @@
 import React from "react";
-import BackofficeLayout from "./backoffice-layout";
+import BackofficeLayout from "@/components/backoffice-layout";
 
 export default function Dashboard() {
   return (

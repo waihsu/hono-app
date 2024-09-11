@@ -23,6 +23,8 @@ import { format } from "date-fns";
 
 export type Transation = {
   id: string;
+  admin_id: string | undefined;
+  ws: WebSocket | null;
   amount: number;
   token: string;
   name: string;
@@ -82,10 +84,8 @@ export const TransationColumns: ColumnDef<Transation>[] = [
     accessorKey: "transation_status",
     header: "Transaction Status",
     cell: ({ row }) => {
-      const { token, user, id, transation_status } = row.original;
-      const socket = new WebSocket(
-        `ws://localhost:3000/ws/actions?type=balance${user?.id}`
-      );
+      const { token, user, ws, id, transation_status, admin_id } = row.original;
+
       async function updateTransation({
         transationId,
         status,
@@ -93,7 +93,7 @@ export const TransationColumns: ColumnDef<Transation>[] = [
         transationId: string;
         status: string;
       }) {
-        if (!transationId || !status)
+        if (!transationId || !status || !ws)
           return toast({
             title: "All fields must be fill.",
             variant: "destructive",
@@ -111,7 +111,15 @@ export const TransationColumns: ColumnDef<Transation>[] = [
           toast({ title: messg, variant: "destructive" });
         } else {
           const { updatedTransatrion } = await resp.json();
-          socket.send(JSON.stringify(updatedTransatrion));
+          ws.send(
+            JSON.stringify({
+              type: "updatetransation",
+              message: updatedTransatrion,
+              sendTo: "singleclient",
+              senderId: admin_id,
+              receiverId: user?.id,
+            })
+          );
           toast({ title: "successful" });
         }
       }

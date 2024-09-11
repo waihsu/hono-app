@@ -4,17 +4,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { ArrowLeft, Gamepad } from "lucide-react";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { toast } from "../ui/use-toast";
 import DeleteDialog from "../delete-dialog";
 import EditOddForm from "./edit-odd-form";
 
 export default function EditOdd() {
-  const socket = new WebSocket(`/ws/actions?type=deleteodd`);
   const { oddId } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { odds, teams } = useAppStore();
+  const { odds, teams, ws, removeOdd } = useAdminStore();
   const validOdd = odds.find((item) => item.id === oddId);
   if (!validOdd) return null;
 
@@ -22,12 +21,12 @@ export default function EditOdd() {
   // console.log(location.search);
   const home_team_id = searchParams.get("home_id");
   const away_team_id = searchParams.get("away_id");
-  console.log(home_team_id, away_team_id);
+  // console.log(home_team_id, away_team_id);
   const validTeams = teams.filter(
     (item) => item.id === home_team_id || item.id === away_team_id
   );
   const data = validTeams.map((item) => ({ id: item.id, name: item.name }));
-
+  if (!ws) return null;
   const onDelete = async () => {
     const resp = await fetch(`/api/odds/${oddId}`, {
       method: "DELETE",
@@ -43,7 +42,14 @@ export default function EditOdd() {
       toast({ title: messg, variant: "destructive" });
     } else {
       const { deletedOdd } = data;
-      socket.send(JSON.stringify(deletedOdd));
+      removeOdd(deletedOdd);
+      ws.send(
+        JSON.stringify({
+          type: "deleteodd",
+          message: deletedOdd,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
       navigate(-1);
     }
@@ -70,7 +76,7 @@ export default function EditOdd() {
             onDelete={onDelete}
           />
         </div>
-        <EditOddForm odd={validOdd} data={data} />
+        <EditOddForm odd={validOdd} data={data} ws={ws} />
       </div>
     </BackofficeLayout>
   );
