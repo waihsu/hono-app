@@ -1,4 +1,4 @@
-import { Team } from "@/types/types";
+import { League, Team } from "@/types/types";
 import { ColumnDef } from "@tanstack/react-table";
 import TeamCard from "../team-card";
 import { format } from "date-fns";
@@ -29,6 +29,7 @@ interface MatchColumn {
   match_status: "SCHEDULED" | "ONGOING" | "FINISHED" | "TIMED";
   home_team_score: number;
   away_team_scroe: number;
+  league: League | undefined;
 }
 
 export const matchColumns: ColumnDef<MatchColumn>[] = [
@@ -120,6 +121,19 @@ export const matchColumns: ColumnDef<MatchColumn>[] = [
   {
     accessorKey: "match_status",
     header: "Match Status",
+  },
+  {
+    accessorKey: "league",
+    header: "League",
+    cell: ({ row }) => {
+      const { league } = row.original;
+      return <div>{league?.name}</div>;
+    },
+    filterFn: (row, columnId, filterValue) => {
+      const { league } = row.original;
+      // console.log(date.getDate() === filterValue.getDate());
+      return league?.name.toLowerCase() === filterValue.toLowerCase();
+    },
   },
   {
     id: "actions",

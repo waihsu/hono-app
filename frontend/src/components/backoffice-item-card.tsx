@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface BackofficeItemCardProps {
   name: string;
   icon: React.ReactNode;
-  value: string;
+  value: number;
 }
 
 export default function BackofficeItemCard({

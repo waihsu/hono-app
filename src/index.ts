@@ -4,17 +4,24 @@ import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import api from "./routes/api";
 import { createBunWebSocket } from "hono/bun";
-import { ServerWebSocket } from "bun";
-import {
-  createCountries,
-  createLeagues,
-  leagues,
-} from "./libs/createCountries";
+import { WSContext } from "hono/ws";
+import { bondesLigaTeams } from "./data/bondesliga-teams";
+import { BondesligaMatches } from "./data/bondesliga-matches";
+import { $Enums } from "@prisma/client";
 import { prisma } from "../db/prisma";
+import { ChampionshipMatches, ChampionshipTeams } from "./data/championship";
+import { EredivisieMatches, EredivisieTeams } from "./data/eredivisie";
+import { LeagueOneTeams } from "./data/league-1-teams";
+import { LeagueOneMatches } from "./data/league-1-matches";
 import { PremiereLeagueteams } from "./data/premierleague-teams";
 import { matches } from "./libs/data";
-import { $Enums } from "@prisma/client";
-import { WSContext } from "hono/ws";
+import { premeiaLigaTeams } from "./data/premeira-liga-teams";
+import { PrimeiraLigaMatches } from "./data/primeira-liga-matches";
+import {
+  PrimeraDivisionTeams,
+  PrimraDivisionMatches,
+} from "./data/primera-devision";
+import { seriesAMatches, seriesATeams } from "./data/series-a";
 
 const { websocket, upgradeWebSocket } = createBunWebSocket();
 
@@ -26,167 +33,91 @@ let userSocketMap: string[] = [];
 
 const app = new Hono().use(logger());
 const admin = "admin";
-// app.get(
-//   "/app",
-//   upgradeWebSocket((_) => ({
-//     onOpen(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       const userId = ws.url?.searchParams.get("userId");
-//       if (userId !== "undefined" && !userSocketMap.includes(userId as string)) {
-//         userSocketMap.push(userId as string);
-//       }
-//       console.log(userSocketMap);
-//       rawWs.subscribe("public");
 
-//       // rawWs.publish(admin, "hello");
-//     },
-//     onMessage(evt, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       rawWs.subscribe(admin);
-//       const data = { type: "onlineusers", payload: userSocketMap };
-//       rawWs.publish(admin, JSON.stringify(data));
-//       // rawWs.publish(admin, JSON.stringify(userSocketMap));
-//     },
-//     onClose(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       const userId = ws.url?.searchParams.get("userId");
-//       if (userId !== "undefined" && userSocketMap.includes(userId as string)) {
-//         userSocketMap = userSocketMap.filter((item) => item !== userId);
-//       }
-//       // rawWs.publish(admin, JSON.stringify(userSocketMap));
-//       rawWs.unsubscribe(admin);
-//     },
-//   }))
-// );
-// app.get(
-//   "/ws/actions",
-//   upgradeWebSocket((_) => ({
-//     onOpen(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       rawWs.subscribe("public");
-//     },
-//     onMessage(evt, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       const type = ws.url?.searchParams.get("type");
-//       console.log(evt.data);
+app.get("/test", async (c) => {
+  //Countries and leagues
+  // const existCountries = await prisma.countries.findMany();
+  // const validLeaguesData = leagues.map((item) => ({
+  //   country_id: existCountries.find(
+  //     (country) => country.code === item.area.code
+  //   )?.id as string,
+  //   name: item.name,
+  //   code: item.code,
+  //   type: item.type,
+  //   image_url: item.emblem,
+  // }));
+  // const data = await createLeagues(validLeaguesData);
 
-//       if (type) {
-//         rawWs.publish("public", JSON.stringify({ type, payload: evt.data }));
-//       }
-//     },
-//     onClose(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       rawWs.unsubscribe("public");
-//       console.log(`WebSocket server closed and unsubscribed from matches `);
-//     },
-//   }))
-// );
-// app.get(
-//   "/admin",
-//   upgradeWebSocket((_) => ({
-//     onOpen(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       rawWs.subscribe(admin);
-//     },
-//     onMessage(evt, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       const type = ws.url?.searchParams.get("type");
-//       if (type) {
-//         console.log(type);
-//         rawWs.publish(admin, JSON.stringify({ type, payload: evt.data }));
-//       }
-//     },
-//     onClose(_, ws) {
-//       const rawWs = ws.raw as ServerWebSocket;
-//       rawWs.unsubscribe(admin);
-//       console.log(`WebSocket server closed and unsubscribed from admin '`);
-//     },
-//   }))
-// );
+  //Team Create
+  const homeTeams = seriesATeams.map((item) => ({
+    name: item.name,
+    shortName: item.shortName,
+    tla: item.tla,
+    image_url: item.crest,
+    address: item.address,
+    website: item.website || "",
+    founded: item.founded || 0,
+    venue: item.venue || "",
+    clubColors: item.clubColors || "",
+  }));
+  const createTeams = await prisma.$transaction(
+    homeTeams.map((item) => prisma.teams.create({ data: item }))
+  );
+  // const existTeams = await prisma.teams.findMany();
 
-// app.get("/test", async (c) => {
-//   //Countries and leagues
-//   // const existCountries = await prisma.countries.findMany();
-//   // const validLeaguesData = leagues.map((item) => ({
-//   //   country_id: existCountries.find(
-//   //     (country) => country.code === item.area.code
-//   //   )?.id as string,
-//   //   name: item.name,
-//   //   code: item.code,
-//   //   type: item.type,
-//   //   image_url: item.emblem,
-//   // }));
-//   // const data = await createLeagues(validLeaguesData);
+  // Create Matches
+  const dataMatches = seriesAMatches.map((match) => ({
+    home_team_id: createTeams.find(
+      (team) => team.tla.toLowerCase() === match.homeTeam.tla.toLowerCase()
+    )?.id as string,
+    away_team_id: createTeams.find(
+      (team) => team.name.toLowerCase() === match.awayTeam.name.toLowerCase()
+    )?.id as string,
+    match_date: match.utcDate,
+    match_status: match.status as $Enums.Match_Status,
+    home_team_score: Number(match.score.fullTime.home),
+    away_team_scroe: Number(match.score.fullTime.away),
+    league_code: match.competition.code,
+  }));
+  const createMatches = await prisma.matches.createMany({ data: dataMatches });
 
-//   //Team Create
-//   const homeTeams = PremiereLeagueteams.map((item) => ({
-//     name: item.name,
-//     shortName: item.shortName,
-//     tla: item.tla,
-//     image_url: item.crest,
-//     address: item.address,
-//     website: item.website || "",
-//     founded: item.founded || 0,
-//     venue: item.venue || "",
-//     clubColors: item.clubColors || "",
-//   }));
-//   const createTeams = await prisma.$transaction(
-//     homeTeams.map((item) => prisma.teams.create({ data: item }))
-//   );
-//   // const existTeams = await prisma.teams.findMany();
+  // Squad Team Person
+  const validTeams = seriesATeams.map((item) => ({
+    id: createTeams.find((exteam) => exteam.tla === item.tla)?.id,
+    tla: item.tla,
+    name: item.shortName,
+    squad: item.squad,
+  }));
+  const create = async (tla: string) => {
+    const team = validTeams.find((item) => item.tla === tla);
+    if (!team) return c.json({ messg: "team error" }, 416);
+    const createdSquad = await prisma.squad.create({
+      data: { name: team.name, team_id: String(team.id) },
+    });
+    const createdPerson = await prisma.$transaction(
+      team.squad.map((item) =>
+        prisma.person.create({
+          data: {
+            name: item.name,
+            date_of_birth: String(item.dateOfBirth),
+            position: item.position,
+            nationality: item.nationality,
+          },
+        })
+      )
+    );
+    const newPersonIds = createdPerson.map((item) => ({
+      person_id: item.id,
+      squad_id: createdSquad.id,
+    }));
+    await prisma.squadMember.createMany({ data: newPersonIds });
+    // const createPerson = await prisma.$transaction(filterTeams.map(item => prisma.person.createMany({data:item})))
+    console.log(newPersonIds);
+  };
+  validTeams.map((item) => create(item.tla));
 
-//   // Create Matches
-//   const dataMatches = matches.map((match) => ({
-//     home_team_id: createTeams.find(
-//       (team) => team.tla.toLowerCase() === match.homeTeam.tla.toLowerCase()
-//     )?.id as string,
-//     away_team_id: createTeams.find(
-//       (team) => team.name.toLowerCase() === match.awayTeam.name.toLowerCase()
-//     )?.id as string,
-//     match_date: match.utcDate,
-//     match_status: match.status as $Enums.Match_Status,
-//     home_team_score: Number(match.score.fullTime.home),
-//     away_team_scroe: Number(match.score.fullTime.away),
-//   }));
-//   const createMatches = await prisma.matches.createMany({ data: dataMatches });
-
-//   // Squad Team Person
-//   const validTeams = PremiereLeagueteams.map((item) => ({
-//     id: createTeams.find((exteam) => exteam.tla === item.tla)?.id,
-//     tla: item.tla,
-//     name: item.shortName,
-//     squad: item.squad,
-//   }));
-//   const create = async (tla: string) => {
-//     const team = validTeams.find((item) => item.tla === tla);
-//     if (!team) return c.json({ messg: "team error" }, 416);
-//     const createdSquad = await prisma.squad.create({
-//       data: { name: team.name, team_id: String(team.id) },
-//     });
-//     const createdPerson = await prisma.$transaction(
-//       team.squad.map((item) =>
-//         prisma.person.create({
-//           data: {
-//             name: item.name,
-//             date_of_birth: String(item.dateOfBirth),
-//             position: item.position,
-//             nationality: item.nationality,
-//           },
-//         })
-//       )
-//     );
-//     const newPersonIds = createdPerson.map((item) => ({
-//       person_id: item.id,
-//       squad_id: createdSquad.id,
-//     }));
-//     await prisma.squadMember.createMany({ data: newPersonIds });
-//     // const createPerson = await prisma.$transaction(filterTeams.map(item => prisma.person.createMany({data:item})))
-//     console.log(newPersonIds);
-//   };
-//   validTeams.map((item) => create(item.tla));
-
-//   return c.json({ createMatches });
-// });
+  return c.json({ createMatches });
+});
 
 const clients = new Map<string, WSContext>(); // Key: userId, Value: WebSocket
 const admins = new Map<string, WSContext>(); // Key: userId, Value: WebSocket

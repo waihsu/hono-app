@@ -118,9 +118,7 @@ export const useAdminStore = create<AdminState>((set) => ({
   onlineUserids: [],
 
   connect: (userId: string) => {
-    const ws = new WebSocket(
-      `ws://localhost:3000/ws?type=admin&userId=${userId}`
-    );
+    const ws = new WebSocket(`/ws?type=admin&userId=${userId}`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");
@@ -153,6 +151,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             bettingMarkets: [...(state.bettingMarkets || []), data.message],
           }));
         } else if (data.type === "deposit") {
+          set((state) => ({
+            transations: [...(state.transations || []), data.message],
+          }));
+        } else if (data.type === "withdraw") {
           set((state) => ({
             transations: [...(state.transations || []), data.message],
           }));

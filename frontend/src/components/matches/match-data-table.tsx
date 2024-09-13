@@ -1,5 +1,6 @@
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/pagination";
 import { useState } from "react";
+import SelectLeague from "../select-league";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,7 +32,7 @@ export function MatchDataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // const [globalFilter, setGlobalFilter] = useState<GlobalFilterTableState>([]);
   const table = useReactTable({
     data,
@@ -39,14 +41,21 @@ export function MatchDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
   });
-
+  function onLeagueChange(value: string) {
+    table.getColumn("league")?.setFilterValue(value);
+  }
   return (
     <div>
+      <div className="mb-4">
+        <SelectLeague name="Select League" setValue={onLeagueChange} />
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>

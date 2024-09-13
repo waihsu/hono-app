@@ -30,7 +30,6 @@ export interface League {
 
 export interface RunningLeague {
   id: string;
-  team_id: string;
   league_id: string;
   created_at: Date;
   updated_at: Date;
@@ -71,6 +70,7 @@ export interface Match {
   home_team_score: number;
   away_team_scroe: number;
   is_archived: boolean;
+  league_code: string;
   created_at: Date;
   updated_at: Date;
 }

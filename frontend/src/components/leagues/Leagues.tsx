@@ -10,7 +10,7 @@ import LeagueCard from "./league-card";
 
 export default function Leagues() {
   const { leagues } = useAdminStore();
-  console.log(leagues);
+  // console.log(leagues);
   return (
     <BackofficeLayout>
       <Heading

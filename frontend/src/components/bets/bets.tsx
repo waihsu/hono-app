@@ -22,7 +22,7 @@ export default function Bets() {
   } = useAdminStore();
   const { token, user: CurrentUser } = useTokenStore();
   const navigate = useNavigate();
-  console.log(bets);
+
   const validMatch = (bettingMarketId: string) => {
     const bettingMarket = bettingMarkets.find(
       (item) => item.id === bettingMarketId

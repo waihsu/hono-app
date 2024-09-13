@@ -24,10 +24,7 @@ const formSchema = z.object({
 });
 
 export default function NewRunningLeageForm() {
-  const socket = new WebSocket(
-    `ws://localhost:3000/ws/actions?type=runningleague`
-  );
-  const { leagues, teams, addRunningLeague } = useAdminStore();
+  const { leagues, teams, addRunningLeague, ws } = useAdminStore();
   const { token } = useTokenStore();
   const [leagueId, setLeagueId] = useState("");
   const [teamIds, setTeamIds] = useState<string[]>([]);
@@ -43,6 +40,7 @@ export default function NewRunningLeageForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!ws) return;
     values.league_id = leagueId;
     values.teamIds = teamIds;
     // console.log(values);
@@ -64,7 +62,13 @@ export default function NewRunningLeageForm() {
     } else {
       const { newRunningLeague } = data;
       addRunningLeague(newRunningLeague);
-      socket.send(JSON.stringify(newRunningLeague));
+      ws.send(
+        JSON.stringify({
+          type: "newrunningleague",
+          message: newRunningLeague,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }

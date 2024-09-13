@@ -57,6 +57,48 @@ transactions.post("/deposit", async (c) => {
   }
 });
 
+transactions.post("/withdraw", async (c) => {
+  try {
+    const token = c.req.header("Bearer");
+
+    if (!token) return c.json({ messg: "Unauthorized" }, 401);
+
+    const { role } = await verify(token, process.env.JWT_SECRET!);
+    if (role !== "USER") return c.json({ messg: "You are not admin" }, 401);
+
+    const {
+      user_id,
+      payment_id,
+      amount,
+      phone_number,
+      name,
+    }: {
+      user_id: string;
+      payment_id: string;
+      amount: string;
+      phone_number: string;
+      name: string;
+    } = await c.req.json();
+    if (!name || !user_id || !payment_id || !amount || !phone_number)
+      return c.json({ messg: "Form not valid" }, 403);
+
+    const newTransation = await prisma.transactions.create({
+      data: {
+        amount: Number(amount),
+        payment_id,
+        phone_number,
+        name,
+        user_id,
+        transaction_type: "WITHDRAW",
+      },
+    });
+    return c.json({ newTransation });
+  } catch (err) {
+    console.log(err);
+    return c.json({ messg: "Error" }, 405);
+  }
+});
+
 transactions.put("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
@@ -106,7 +148,7 @@ transactions.put("/", async (c) => {
           user_role: true,
         },
       });
-      return c.json({ updatedBalence });
+      return c.json({ updatedTransatrion });
     }
     const updatedTransatrion = await prisma.transactions.update({
       where: { id: transationId },

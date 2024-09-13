@@ -3,6 +3,7 @@ import * as React from "react";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -73,7 +74,7 @@ export default function AdminMobileNav({
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
         <SheetTitle className="text-xl sm:text-3xl">{name}</SheetTitle>
-        {/* <SheetDescription>select shop</SheetDescription> */}
+        <SheetDescription>backoffice</SheetDescription>
 
         {/* <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6 "> */}
         <div className="flex flex-col space-y-3 ml-4 mt-4">

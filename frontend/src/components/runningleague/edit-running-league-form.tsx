@@ -35,9 +35,6 @@ export default function EditRunningLeageForm({
   currentTeamIds,
   connectedLeagueId,
 }: EditRunningLeageFormProps) {
-  const socket = new WebSocket(
-    `ws://localhost:3000/ws/actions?type=editrunningleague`
-  );
   const { leagues, teams, addRunningLeague } = useAdminStore();
   const { token } = useTokenStore();
   const [leagueId, setLeagueId] = useState(connectedLeagueId);
@@ -76,7 +73,7 @@ export default function EditRunningLeageForm({
     } else {
       const { newRunningLeague } = data;
       addRunningLeague(newRunningLeague);
-      socket.send(JSON.stringify(newRunningLeague));
+      // socket.send(JSON.stringify(newRunningLeague));
       toast({ title: "successful" });
     }
   }

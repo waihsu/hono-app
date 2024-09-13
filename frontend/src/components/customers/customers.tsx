@@ -44,7 +44,7 @@ export default function Customers() {
         name="Customers"
       />
 
-      <div>
+      <div className="w-full">
         <DataTable columns={columns} data={validUserData} />
       </div>
     </BackofficeLayout>

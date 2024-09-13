@@ -9,7 +9,7 @@ import CountryCard from "./country-card";
 
 export default function Countries() {
   const { countries } = useAdminStore();
-  console.log(countries);
+  // console.log(countries);
   return (
     <BackofficeLayout>
       <Heading

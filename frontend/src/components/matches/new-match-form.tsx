@@ -21,16 +21,10 @@ export default function NewMatchForm() {
   const { teams, ws } = useAdminStore();
   const { token } = useTokenStore();
   const [matchDate, setMatchDate] = useState<Date | undefined>(undefined);
-
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
-  // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  // 1. Define your form.
-  // const socket = new WebSocket(
-  //   `ws://localhost:3000/ws?type=admin&userId=${user?.id}`
-  // );
-  // 2. Define a submit handler.
+
   async function onSubmit() {
     console.log("clicked");
     if (!ws) return toast({ title: "ws connecting.." });

@@ -13,6 +13,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  SUPERADMIN
+  USER
+}
+
+enum AccountStatusType {
+  SUSPENDED
+  ACTIVE
+  BAN
+}
+
+enum Match_Status {
+  SCHEDULED
+  LIVE
+  IN_PLAY
+  PAUSED
+  FINISHED
+  POSTPONED
+  SUSPENDED
+  CANCELLED
+  TIMED
+}
+
+enum MarketStatus {
+  OPEN
+  CLOSE
+}
+
+enum Bet_Status {
+  PENDING
+  WON
+  LOST
+  CANCLED
+}
+
+enum Payment_Method {
+  WAVEPAY
+  KPAY
+}
+
+enum Transation_Status {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Transation_Type {
+  DEPOSIT
+  WITHDRAW
+}
+
 model User {
   id             String            @id @default(cuid())
   username       String            @unique
@@ -63,11 +115,12 @@ model Countries {
 model Leagues {
   id            String          @id @default(cuid())
   name          String
-  code          String
+  code          String          @unique
   type          String
   image_url     String
   is_archived   Boolean         @default(false)
   RunningLeague RunningLeague[]
+  Matches       Matches[]
   country_id    String
 
   Countres   Countries @relation(fields: [country_id], references: [id])
@@ -77,10 +130,8 @@ model Leagues {
 
 model RunningLeague {
   id         String   @id @default(cuid())
-  team_id    String
   league_id  String
   Leagues    Leagues  @relation(fields: [league_id], references: [id])
-  Teams      Teams    @relation(fields: [team_id], references: [id])
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
 }
@@ -98,11 +149,10 @@ model Teams {
   clubColors  String
   is_archived Boolean @default(false)
 
-  HomeTeam      Matches[]       @relation("HomeTeam")
-  AwayTeam      Matches[]       @relation("AwayTeam")
-  RunningLeague RunningLeague[]
-  Odds          Odds[]
-  Squad         Squad[]
+  HomeTeam Matches[] @relation("HomeTeam")
+  AwayTeam Matches[] @relation("AwayTeam")
+  Odds     Odds[]
+  Squad    Squad[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -144,18 +194,19 @@ model Person {
 }
 
 model Matches {
-  id              String       @id @default(cuid())
+  id              String         @id @default(cuid())
   home_team_id    String
   away_team_id    String
   match_date      DateTime
-  match_status    Match_Status @default(SCHEDULED)
-  home_team_score Int          @default(0)
-  away_team_scroe Int          @default(0)
-  is_archived     Boolean      @default(false)
-  HomeTeam        Teams        @relation("HomeTeam", fields: [home_team_id], references: [id])
-  AwayTeam        Teams        @relation("AwayTeam", fields: [away_team_id], references: [id])
-
-  PublishMatch PublishMatch[]
+  match_status    Match_Status   @default(SCHEDULED)
+  home_team_score Int            @default(0)
+  away_team_scroe Int            @default(0)
+  is_archived     Boolean        @default(false)
+  HomeTeam        Teams          @relation("HomeTeam", fields: [home_team_id], references: [id])
+  AwayTeam        Teams          @relation("AwayTeam", fields: [away_team_id], references: [id])
+  league_code     String
+  League          Leagues        @relation(fields: [league_code], references: [code])
+  PublishMatch    PublishMatch[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -263,56 +314,4 @@ model Payment {
   updated_at  DateTime       @updatedAt()
 
   @@index([admin_id])
-}
-
-enum UserRole {
-  ADMIN
-  SUPERADMIN
-  USER
-}
-
-enum AccountStatusType {
-  SUSPENDED
-  ACTIVE
-  BAN
-}
-
-enum Match_Status {
-  SCHEDULED
-  LIVE
-  IN_PLAY
-  PAUSED
-  FINISHED
-  POSTPONED
-  SUSPENDED
-  CANCELLED
-  TIMED
-}
-
-enum MarketStatus {
-  OPEN
-  CLOSE
-}
-
-enum Bet_Status {
-  PENDING
-  WON
-  LOST
-  CANCLED
-}
-
-enum Payment_Method {
-  WAVEPAY
-  KPAY
-}
-
-enum Transation_Status {
-  PENDING
-  COMPLETED
-  FAILED
-}
-
-enum Transation_Type {
-  DEPOSIT
-  WITHDRAW
 }

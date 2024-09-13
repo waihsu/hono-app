@@ -20,7 +20,7 @@ export default function AdminNav({ sidebarNav, user }: AdminNavProps) {
   return (
     <div className=" min-w-full flex justify-between items-center  z-20 shadow-lg py-4 px-8 sticky top-0 backdrop-blur-sm bg-background/90  supports-[backdrop-filter]:bg-background/10">
       <div className="lg:hidden">
-        <AdminMobileNav name="Backoffice" sidebarNav={sidebarNav} />
+        <AdminMobileNav name="Football" sidebarNav={sidebarNav} />
       </div>
       <div>
         <NavLink sidebarNav={sidebarNav} />
@@ -28,7 +28,7 @@ export default function AdminNav({ sidebarNav, user }: AdminNavProps) {
 
       <div className="flex gap-2 items-center">
         {user ? (
-          <DropdownProfile user={user} betItemsLength={0} />
+          <DropdownProfile user={user} />
         ) : (
           <span className=" cursor-pointer py-1 rounded-md px-3 text-xs border border-input bg-background shadow-sm hover:bg-accent hover:text-primary">
             <Link to={`/login`}>Login</Link>

@@ -12,9 +12,7 @@ export const useWebSocketStore = create<WebSocketState>((set) => ({
   messages: [],
 
   connect: (userId: string) => {
-    const ws = new WebSocket(
-      `ws://localhost:3000/ws?type=admin&userId=${userId}`
-    );
+    const ws = new WebSocket(`/ws?type=admin&userId=${userId}`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");

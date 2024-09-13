@@ -81,7 +81,7 @@ export default function EditMatchForm({
       toast({ title: "successful" });
     }
   }
-  console.log(matchDate);
+
   function onSeleteDate(date: Date | undefined) {
     if (!date) return;
     setMatchDate(date);

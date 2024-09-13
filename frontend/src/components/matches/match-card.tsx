@@ -26,10 +26,10 @@ export default function MatchCard({ match }: { match: Match }) {
             />
           </div>
           <div className="flex items-center justify-center gap-x-2">
-            <p className=" text-xl sm:text-2xl font-bold">
+            <p className=" text-sm lg:text-2xl font-bold">
               {match.away_team_scroe}
             </p>
-            <p className="text-xl sm:text-2xl font-bold">
+            <p className="text-sm lg:text-2xl font-bold">
               {match.away_team_scroe}
             </p>
           </div>

@@ -9,6 +9,7 @@ import {
   Shield,
   ShieldHalf,
   Swords,
+  Users,
   WalletCards,
 } from "lucide-react";
 
@@ -18,21 +19,21 @@ export const sidebarNav = [
     href: `/dashboard`,
     icon: LayoutDashboard,
   },
-  // {
-  //   title: "Bets",
-  //   href: `/bets`,
-  //   icon: Receipt,
-  // },
-  // {
-  //   title: "Transations",
-  //   href: `/transations`,
-  //   icon: ArrowLeftRight,
-  // },
-  // {
-  //   title: "Customers",
-  //   href: `/customers`,
-  //   icon: Users,
-  // },
+  {
+    title: "Bets",
+    href: `/bets`,
+    icon: Receipt,
+  },
+  {
+    title: "Transations",
+    href: `/transations`,
+    icon: ArrowLeftRight,
+  },
+  {
+    title: "Customers",
+    href: `/customers`,
+    icon: Users,
+  },
   {
     title: "Countries",
     href: `/countries`,
@@ -44,11 +45,6 @@ export const sidebarNav = [
     icon: ShieldHalf,
   },
   {
-    title: "Running Leagues",
-    href: `/runningleagues`,
-    icon: Cable,
-  },
-  {
     title: "Teams",
     href: `/teams`,
     icon: Shield,
@@ -56,7 +52,7 @@ export const sidebarNav = [
   {
     title: "Matches",
     href: `/matches`,
-    icon: Swords,
+    icon: Cable,
   },
   {
     title: "Betting Market",

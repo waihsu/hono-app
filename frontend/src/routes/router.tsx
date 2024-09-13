@@ -32,66 +32,22 @@ import NewPayment from "@/components/payments/new-payment";
 import EditPayment from "@/components/payments/edit-payment";
 import { useAdminStore } from "@/store/use-admin-store";
 import App from "@/App";
-import RunningLeague from "@/components/runningleague/running-league";
-import NewRunningLeague from "@/components/runningleague/new-running-league";
-import EidtRunningLeague from "@/components/runningleague/edit-running-league";
+
 import Settings from "@/components/settings/settings";
 import AdminSettings from "@/components/settings/admin";
 import Customers from "@/components/customers/customers";
 import SingleCustomerView from "@/components/customers/single-customer-view";
+import RecentMatches from "@/components/matches/recent-matches";
+import NextMatches from "@/components/matches/next-matches";
 
 export default function Router() {
   const { user, token } = useTokenStore();
-
-  // const socket = new WebSocket(
-  //   `ws://localhost:3000/ws?type=admin&userId=${user?.id}`
-  // );
-  const {
-    getAppData,
-    // addBet,
-    // setOnlineUserIds,
-    // addTransation,
-    // updateUser,
-    // addPublishMatch,
-    connect,
-  } = useAdminStore();
-  // useEffect(() => {
-  //   if (!ws) return;
-  //   ws.onopen = () => {
-  //     ws.send(
-  //       JSON.stringify({
-  //         type: "admin-message",
-  //         senderId: "your_client_id",
-  //         content: "message",
-  //         targetAdminId: "admin_id_to_target",
-  //       })
-  //     );
-  //   };
-
-  //   ws.onmessage = (ev) => {
-  //     const { type, payload } = JSON.parse(ev.data);
-  //     console.log(ev.data);
-  //     if (type === "onlineusers") {
-  //       // console.log(payload);
-  //       setOnlineUserIds(payload);
-  //     } else if (type === `${user?.id}`) {
-  //       updateUser(JSON.parse(payload));
-  //     } else if (type === `newbet${user?.id}`) {
-  //       // console.log("payload", payload);
-  //       addBet(JSON.parse(payload));
-  //     } else if (type === `tran${user?.id}`) {
-  //       addTransation(JSON.parse(payload));
-  //     } else if (type === `publishmatch${user?.id}`) {
-  //       console.log(JSON.parse(payload));
-  //       addPublishMatch(JSON.parse(payload));
-  //     }
-  //   };
-  // }, []);
+  const { getAppData, connect } = useAdminStore();
 
   useEffect(() => {
     if (!user?.id || !token) return;
     getAppData({ userId: String(user?.id), token });
-    console.log("router");
+
     connect(user.id);
   }, []);
 
@@ -117,9 +73,9 @@ export default function Router() {
         <Route path="/leagues/:id" Component={EditLeague} />
 
         {/* Running League */}
-        <Route path="/runningleagues" Component={RunningLeague} />
+        {/* <Route path="/runningleagues" Component={RunningLeague} />
         <Route path="/runningleagues/new" Component={NewRunningLeague} />
-        <Route path="/runningleagues/:id" Component={EidtRunningLeague} />
+        <Route path="/runningleagues/:id" Component={EidtRunningLeague} /> */}
 
         {/* Country */}
         <Route path="/countries" Component={Countries} />
@@ -133,6 +89,8 @@ export default function Router() {
 
         {/* Matches */}
         <Route path="/matches" Component={Matches} />
+        <Route path="/matches/recent" Component={RecentMatches} />
+        <Route path="/matches/next" Component={NextMatches} />
         <Route path="/matches/new" Component={NewMatch} />
         <Route path="/matches/:id" Component={EditMatch} />
 
