@@ -36,7 +36,7 @@ export default function Transations() {
     payment: validPayment(item.payment_id),
     created_At: item.created_at,
   }));
-  if (!ws) return null;
+
   return (
     <BackofficeLayout>
       <Heading
