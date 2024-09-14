@@ -31,93 +31,93 @@ interface OnlineUser {
 
 let userSocketMap: string[] = [];
 
-const app = new Hono().use(logger());
+const app = new Hono().use(logger()).use(cors());
 const admin = "admin";
 
-app.get("/test", async (c) => {
-  //Countries and leagues
-  // const existCountries = await prisma.countries.findMany();
-  // const validLeaguesData = leagues.map((item) => ({
-  //   country_id: existCountries.find(
-  //     (country) => country.code === item.area.code
-  //   )?.id as string,
-  //   name: item.name,
-  //   code: item.code,
-  //   type: item.type,
-  //   image_url: item.emblem,
-  // }));
-  // const data = await createLeagues(validLeaguesData);
+// app.get("/test", async (c) => {
+//   //Countries and leagues
+//   // const existCountries = await prisma.countries.findMany();
+//   // const validLeaguesData = leagues.map((item) => ({
+//   //   country_id: existCountries.find(
+//   //     (country) => country.code === item.area.code
+//   //   )?.id as string,
+//   //   name: item.name,
+//   //   code: item.code,
+//   //   type: item.type,
+//   //   image_url: item.emblem,
+//   // }));
+//   // const data = await createLeagues(validLeaguesData);
 
-  //Team Create
-  const homeTeams = seriesATeams.map((item) => ({
-    name: item.name,
-    shortName: item.shortName,
-    tla: item.tla,
-    image_url: item.crest,
-    address: item.address,
-    website: item.website || "",
-    founded: item.founded || 0,
-    venue: item.venue || "",
-    clubColors: item.clubColors || "",
-  }));
-  const createTeams = await prisma.$transaction(
-    homeTeams.map((item) => prisma.teams.create({ data: item }))
-  );
-  // const existTeams = await prisma.teams.findMany();
+//   //Team Create
+//   const homeTeams = seriesATeams.map((item) => ({
+//     name: item.name,
+//     shortName: item.shortName,
+//     tla: item.tla,
+//     image_url: item.crest,
+//     address: item.address,
+//     website: item.website || "",
+//     founded: item.founded || 0,
+//     venue: item.venue || "",
+//     clubColors: item.clubColors || "",
+//   }));
+//   const createTeams = await prisma.$transaction(
+//     homeTeams.map((item) => prisma.teams.create({ data: item }))
+//   );
+//   // const existTeams = await prisma.teams.findMany();
 
-  // Create Matches
-  const dataMatches = seriesAMatches.map((match) => ({
-    home_team_id: createTeams.find(
-      (team) => team.tla.toLowerCase() === match.homeTeam.tla.toLowerCase()
-    )?.id as string,
-    away_team_id: createTeams.find(
-      (team) => team.name.toLowerCase() === match.awayTeam.name.toLowerCase()
-    )?.id as string,
-    match_date: match.utcDate,
-    match_status: match.status as $Enums.Match_Status,
-    home_team_score: Number(match.score.fullTime.home),
-    away_team_scroe: Number(match.score.fullTime.away),
-    league_code: match.competition.code,
-  }));
-  const createMatches = await prisma.matches.createMany({ data: dataMatches });
+//   // Create Matches
+//   const dataMatches = seriesAMatches.map((match) => ({
+//     home_team_id: createTeams.find(
+//       (team) => team.tla.toLowerCase() === match.homeTeam.tla.toLowerCase()
+//     )?.id as string,
+//     away_team_id: createTeams.find(
+//       (team) => team.name.toLowerCase() === match.awayTeam.name.toLowerCase()
+//     )?.id as string,
+//     match_date: match.utcDate,
+//     match_status: match.status as $Enums.Match_Status,
+//     home_team_score: Number(match.score.fullTime.home),
+//     away_team_scroe: Number(match.score.fullTime.away),
+//     league_code: match.competition.code,
+//   }));
+//   const createMatches = await prisma.matches.createMany({ data: dataMatches });
 
-  // Squad Team Person
-  const validTeams = seriesATeams.map((item) => ({
-    id: createTeams.find((exteam) => exteam.tla === item.tla)?.id,
-    tla: item.tla,
-    name: item.shortName,
-    squad: item.squad,
-  }));
-  const create = async (tla: string) => {
-    const team = validTeams.find((item) => item.tla === tla);
-    if (!team) return c.json({ messg: "team error" }, 416);
-    const createdSquad = await prisma.squad.create({
-      data: { name: team.name, team_id: String(team.id) },
-    });
-    const createdPerson = await prisma.$transaction(
-      team.squad.map((item) =>
-        prisma.person.create({
-          data: {
-            name: item.name,
-            date_of_birth: String(item.dateOfBirth),
-            position: item.position,
-            nationality: item.nationality,
-          },
-        })
-      )
-    );
-    const newPersonIds = createdPerson.map((item) => ({
-      person_id: item.id,
-      squad_id: createdSquad.id,
-    }));
-    await prisma.squadMember.createMany({ data: newPersonIds });
-    // const createPerson = await prisma.$transaction(filterTeams.map(item => prisma.person.createMany({data:item})))
-    console.log(newPersonIds);
-  };
-  validTeams.map((item) => create(item.tla));
+//   // Squad Team Person
+//   const validTeams = seriesATeams.map((item) => ({
+//     id: createTeams.find((exteam) => exteam.tla === item.tla)?.id,
+//     tla: item.tla,
+//     name: item.shortName,
+//     squad: item.squad,
+//   }));
+//   const create = async (tla: string) => {
+//     const team = validTeams.find((item) => item.tla === tla);
+//     if (!team) return c.json({ messg: "team error" }, 416);
+//     const createdSquad = await prisma.squad.create({
+//       data: { name: team.name, team_id: String(team.id) },
+//     });
+//     const createdPerson = await prisma.$transaction(
+//       team.squad.map((item) =>
+//         prisma.person.create({
+//           data: {
+//             name: item.name,
+//             date_of_birth: String(item.dateOfBirth),
+//             position: item.position,
+//             nationality: item.nationality,
+//           },
+//         })
+//       )
+//     );
+//     const newPersonIds = createdPerson.map((item) => ({
+//       person_id: item.id,
+//       squad_id: createdSquad.id,
+//     }));
+//     await prisma.squadMember.createMany({ data: newPersonIds });
+//     // const createPerson = await prisma.$transaction(filterTeams.map(item => prisma.person.createMany({data:item})))
+//     console.log(newPersonIds);
+//   };
+//   validTeams.map((item) => create(item.tla));
 
-  return c.json({ createMatches });
-});
+//   return c.json({ createMatches });
+// });
 
 const clients = new Map<string, WSContext>(); // Key: userId, Value: WebSocket
 const admins = new Map<string, WSContext>(); // Key: userId, Value: WebSocket
