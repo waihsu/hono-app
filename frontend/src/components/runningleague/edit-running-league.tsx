@@ -1,25 +1,32 @@
 import React from "react";
-import BackofficeLayout from "./backoffice-layout";
-import Heading from "./Heading";
+import BackofficeLayout from "@/components/backoffice-layout";
+import Heading from "../Heading";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { ArrowLeft, ShieldHalf } from "lucide-react";
-import { useAppStore } from "@/store/use-app-store";
-import EditLeagueForm from "./edit-league-form";
+import { useAdminStore } from "@/store/use-admin-store";
 import { useTokenStore } from "@/store/use-bear-store";
-import { toast } from "./ui/use-toast";
-import DeleteDialog from "./delete-dialog";
+import { toast } from "../ui/use-toast";
+import DeleteDialog from "../delete-dialog";
+import EditRunningLeageForm from "./edit-running-league-form";
 
-export default function EidtLeague() {
+export default function EidtRunningLeague() {
   const { id } = useParams();
   const { token } = useTokenStore();
   const navigate = useNavigate();
-  const { leagues, removeLeague } = useAppStore();
-  const validLeague = leagues.find((item) => item.id === id);
-  if (!validLeague) return null;
+  const { runningLeagues } = useAdminStore();
+  const validRunningLeague = runningLeagues.find((item) => item.id === id);
+  // console.log(validRunningLeague);
+
+  const teamIdsByLeague = runningLeagues
+    .filter((item) => item.league_id === validRunningLeague?.league_id)
+    .map((item) => item.team_id);
+
+  if (!validRunningLeague) return null;
+
   const onDelete = async () => {
-    const resp = await fetch(`/api/leagues/${id}`, {
+    const resp = await fetch(`/api/runngingleagues/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -32,11 +39,9 @@ export default function EidtLeague() {
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { deletedLeague } = data;
-      console.log(deletedLeague);
-      removeLeague(deletedLeague);
+      // const { deletedLeague } = data;
       toast({ title: "successful" });
-      navigate("/backoffice/leagues");
+      navigate("/runningleagues");
     }
   };
   return (
@@ -48,13 +53,13 @@ export default function EidtLeague() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/leagues`}
+            to={`/runningleagues`}
           >
             <ArrowLeft /> Back
           </Link>
         }
-        description="edit your leagues"
-        name="Edit Leagues"
+        description="edit your running leagues"
+        name="Edit Running Leagues"
       />
       <div>
         <div className=" flex justify-end">
@@ -67,7 +72,11 @@ export default function EidtLeague() {
             onDelete={onDelete}
           />
         </div>
-        <EditLeagueForm league={validLeague} />
+        <EditRunningLeageForm
+          currentId={String(id)}
+          currentTeamIds={teamIdsByLeague}
+          connectedLeagueId={validRunningLeague.league_id}
+        />
       </div>
     </BackofficeLayout>
   );

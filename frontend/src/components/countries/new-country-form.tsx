@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -24,7 +24,7 @@ const formSchema = z.object({
 });
 
 export default function NewCountryForm() {
-  const { addCountry } = useAppStore();
+  const { addCountry } = useAdminStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   // 1. Define your form.

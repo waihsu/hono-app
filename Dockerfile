@@ -2,7 +2,7 @@
 # see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:latest AS base
 WORKDIR /app
-FROM base as build
+FROM base AS build
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds
@@ -11,7 +11,7 @@ COPY --link bun.lockb package.json ./
 COPY prisma ./prisma
 COPY .env .env
 RUN bun install 
-# RUN bun add @prisma/clien
+RUN bun add @prisma/client
 RUN bunx prisma generate
 
 # Install frontend node modules

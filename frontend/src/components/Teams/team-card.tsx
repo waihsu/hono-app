@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+
 export default function TeamCard({
   name,
   image_url,
@@ -6,11 +8,13 @@ export default function TeamCard({
   image_url: string;
 }) {
   return (
-    <div className="bg-card border p-4 flex flex-col justify-center items-center gap-2 rounded-md">
-      <div>{name}</div>
-      <div className="rounded-full overflow-hidden w-32 h-32 ">
+    <Card className="aspect-square">
+      <CardHeader>
+        <CardTitle>{name}</CardTitle>
+      </CardHeader>
+      <CardContent>
         <img src={image_url} alt="" className="w-full h-full object-center" />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

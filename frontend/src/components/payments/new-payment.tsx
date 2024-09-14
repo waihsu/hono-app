@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
-import NewLeageForm from "./new-league-form";
+import NewPaymentForm from "./new-payment-form";
 
-export default function NewLeague() {
+export default function NewPayment() {
   return (
     <BackofficeLayout>
       <Heading
@@ -17,16 +17,16 @@ export default function NewLeague() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/leagues`}
+            to={`/payments`}
           >
             <ArrowLeft /> Back
           </Link>
         }
-        description="create a league"
-        name="New Leagues"
+        description="create a payment"
+        name="New Payment"
       />
       <div>
-        <NewLeageForm />
+        <NewPaymentForm />
       </div>
     </BackofficeLayout>
   );

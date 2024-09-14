@@ -13,156 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id  String @id @default(cuid())
-  username String @unique
-  email String @unique
-  password_hash String
-  balance Float @default(0)
-  account_status AccountStatusType @default(ACTIVE)
-
-user_role UserRole @default(USER)
-
-  Bets Bets[]
-  Transations Transactions[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-
-  @@index([username,email])
-}
-
-model Countries {
-   id  String @id @default(cuid())
-   name String
-is_archived Boolean @default(false)
-   Teams Teams[]
-
-   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-}
-
-
-model Leagues {
-   id  String @id @default(cuid())
-   name String
-   is_archived Boolean @default(false)
-
-   Teams Teams[]
-   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-}
-
-
-model Teams {
-   id  String @id @default(cuid())
-   name String
-   image_url  String
-   country_id String
-   league_id  String
-   is_archived Boolean @default(false)
-
-   HomeTeam Matches[] @relation("HomeTeam")
-   AwayTeam Matches[] @relation("AwayTeam")
-
-   Odds Odds[]
-
-   Country Countries @relation(fields: [country_id],references: [id])
-   Leagues Leagues @relation(fields: [league_id],references: [id])
-}
-
-
-model Matches {
-  id  String @id @default(cuid())
-  home_team_id  String
-  away_team_id  String
-  match_date  DateTime
-  match_status Match_Status @default(SCHEDULED)
-  home_team_score Int @default(0)
-  away_team_scroe Int  @default(0)
-is_archived Boolean @default(false)
-  HomeTeam  Teams @relation("HomeTeam",fields: [home_team_id],references: [id])
-  AwayTeam  Teams @relation("AwayTeam",fields: [away_team_id],references: [id])
-  BettingMarkets BettingMarkets[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-
-  @@unique([home_team_id,away_team_id])
-}
-
-model BettingMarkets {
-  id  String @id @default(cuid())
-  match_id String
-  market_type String
-  market_status MarketStatus @default(OPEN)
-is_archived Boolean @default(false)
-  Matches Matches @relation(fields: [match_id],references: [id])
-  Odds Odds[]
-  Bets Bets[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-
-  @@index([match_id])
-}
-
-
-model Odds {
-id  String @id @default(cuid())
-  betting_market_id String
-  team_id String
-  outcome String
-  odd_value Float
-is_archived Boolean @default(false)
-  BettingMarkets BettingMarkets @relation(fields: [betting_market_id],references: [id])
-  Bets Bets[]
-
-  Teams  Teams @relation(fields: [team_id],references: [id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-
-  @@index([betting_market_id])
-}
-
-
-model Bets {
-  id  String @id @default(cuid())
-  user_id String
-  betting_market_id String
-  odd_id  String
-  amount  Int
-  bet_status Bet_Status
-
-  users User @relation(fields: [user_id],references: [id])
-  BettingMarkets BettingMarkets @relation(fields: [betting_market_id],references: [id])
-  Odds Odds @relation(fields: [odd_id],references: [id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-}
-
-
-model Transactions {
-  id  String @id @default(cuid())
-  user_id String
-  payment_method  Payment_Method
-  amount  Int
-  phone_number  Int
-  name  String
-  kpay_tran_id  String
-  transation_status Transation_Status
-
-  users User @relation(fields: [user_id],references: [id])
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt()
-
-  @@index([user_id])
-}
-
-
 enum UserRole {
   ADMIN
   SUPERADMIN
@@ -176,9 +26,15 @@ enum AccountStatusType {
 }
 
 enum Match_Status {
-  SCHEDULED 
-  ONGOING
+  SCHEDULED
+  LIVE
+  IN_PLAY
+  PAUSED
   FINISHED
+  POSTPONED
+  SUSPENDED
+  CANCELLED
+  TIMED
 }
 
 enum MarketStatus {
@@ -199,6 +55,263 @@ enum Payment_Method {
 }
 
 enum Transation_Status {
+  PENDING
   COMPLETED
   FAILED
+}
+
+enum Transation_Type {
+  DEPOSIT
+  WITHDRAW
+}
+
+model User {
+  id             String            @id @default(cuid())
+  username       String            @unique
+  email          String            @unique
+  password_hash  String
+  balance        Float             @default(0)
+  account_status AccountStatusType @default(ACTIVE)
+
+  user_role UserRole @default(USER)
+
+  SocialMediaLink SocialMediaLink[]
+  Bets            Bets[]
+  Transations     Transactions[]
+  PublishMatch    PublishMatch[]
+  Admin           Bets[]            @relation("ADMIN")
+  Payments        Payment[]         @relation("Payment")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([username, email])
+}
+
+model SocialMediaLink {
+  id      String @id @default(cuid())
+  name    String
+  link    String
+  user_id String
+
+  User       User     @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Countries {
+  id   String @id @default(cuid())
+  name String
+  code String
+
+  is_archived Boolean   @default(false)
+  flag        String
+  Leagues     Leagues[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Leagues {
+  id            String          @id @default(cuid())
+  name          String
+  code          String          @unique
+  type          String
+  image_url     String
+  is_archived   Boolean         @default(false)
+  RunningLeague RunningLeague[]
+  Matches       Matches[]
+  country_id    String
+
+  Countres   Countries @relation(fields: [country_id], references: [id])
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt()
+}
+
+model RunningLeague {
+  id         String   @id @default(cuid())
+  league_id  String
+  Leagues    Leagues  @relation(fields: [league_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Teams {
+  id          String  @id @default(cuid())
+  name        String
+  shortName   String
+  tla         String
+  image_url   String
+  address     String
+  website     String
+  founded     Int
+  venue       String
+  clubColors  String
+  is_archived Boolean @default(false)
+
+  HomeTeam Matches[] @relation("HomeTeam")
+  AwayTeam Matches[] @relation("AwayTeam")
+  Odds     Odds[]
+  Squad    Squad[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Squad {
+  id      String @id @default(cuid())
+  team_id String
+  name    String
+  Teams   Teams  @relation(fields: [team_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model SquadMember {
+  id        String @id @default(cuid())
+  squad_id  String
+  person_id String
+  Persons   Person @relation(fields: [person_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Person {
+  id            String  @id @default(cuid())
+  name          String
+  date_of_birth String
+  nationality   String
+  section       String?
+  position      String?
+  shirt_number  String?
+
+  SquadMember SquadMember[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Matches {
+  id              String         @id @default(cuid())
+  home_team_id    String
+  away_team_id    String
+  match_date      DateTime
+  match_status    Match_Status   @default(SCHEDULED)
+  home_team_score Int            @default(0)
+  away_team_scroe Int            @default(0)
+  is_archived     Boolean        @default(false)
+  HomeTeam        Teams          @relation("HomeTeam", fields: [home_team_id], references: [id])
+  AwayTeam        Teams          @relation("AwayTeam", fields: [away_team_id], references: [id])
+  league_code     String
+  League          Leagues        @relation(fields: [league_code], references: [code])
+  PublishMatch    PublishMatch[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@unique([home_team_id, away_team_id, match_date])
+}
+
+model PublishMatch {
+  id       String @id @default(cuid())
+  match_id String
+  user_id  String
+  User     User   @relation(fields: [user_id], references: [id])
+
+  Matches        Matches          @relation(fields: [match_id], references: [id])
+  BettingMarkets BettingMarkets[]
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt()
+
+  @@index([user_id])
+}
+
+model BettingMarkets {
+  id               String       @id @default(cuid())
+  publish_match_id String
+  market_type      String
+  market_status    MarketStatus @default(OPEN)
+  is_archived      Boolean      @default(false)
+  PublishMatch     PublishMatch @relation(fields: [publish_match_id], references: [id])
+  Odds             Odds[]
+  Bets             Bets[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([publish_match_id])
+}
+
+model Odds {
+  id                String         @id @default(cuid())
+  betting_market_id String
+  team_id           String
+  outcome           String
+  odd_value         Float
+  is_archived       Boolean        @default(false)
+  BettingMarkets    BettingMarkets @relation(fields: [betting_market_id], references: [id])
+  Bets              Bets[]
+
+  Teams Teams @relation(fields: [team_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([betting_market_id])
+}
+
+model Bets {
+  id                String     @id @default(cuid())
+  user_id           String
+  betting_market_id String
+  odd_id            String
+  amount            Int
+  bet_status        Bet_Status @default(PENDING)
+  admin_id          String
+
+  Admin          User           @relation("ADMIN", fields: [admin_id], references: [id])
+  users          User           @relation(fields: [user_id], references: [id])
+  BettingMarkets BettingMarkets @relation(fields: [betting_market_id], references: [id])
+  Odds           Odds           @relation(fields: [odd_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+}
+
+model Transactions {
+  id                String            @id @default(cuid())
+  user_id           String
+  payment_id        String
+  amount            Int
+  phone_number      String
+  name              String
+  transfer_id       String?
+  transation_status Transation_Status @default(PENDING)
+  transaction_type  Transation_Type
+  users             User              @relation(fields: [user_id], references: [id])
+  payments          Payment           @relation(fields: [payment_id], references: [id])
+  is_archived       Boolean           @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@index([user_id])
+}
+
+model Payment {
+  id             String  @id @default(cuid())
+  payment_name   String
+  payment_number String
+  name           String
+  admin_id       String
+  is_archived    Boolean @default(false)
+  Admin          User    @relation("Payment", fields: [admin_id], references: [id])
+
+  Transations Transactions[]
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt()
+
+  @@index([admin_id])
 }

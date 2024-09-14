@@ -1,13 +1,11 @@
-import App from "@/App";
 import { Route, Routes } from "react-router-dom";
 import ProtectRoute from "./protect-route";
 import { Register } from "@/components/register";
 import { Login } from "@/components/login";
 import Leagues from "@/components/leagues/Leagues";
-import NewLeague from "@/components/new-league/new-league";
+import NewLeague from "@/components/leagues/new-league";
 import { useEffect } from "react";
-import { useAppStore } from "@/store/use-app-store";
-import EditLeague from "@/components/edit-league";
+import EditLeague from "@/components/leagues/edit-league";
 import Countries from "@/components/countries/countries";
 // import Settings from "@/components/settings/settings";
 import Matches from "@/components/matches/matches";
@@ -26,122 +24,103 @@ import EditMatch from "@/components/matches/edit-match";
 import BettingMarketsByMatch from "@/components/bettingmarket/BettingMarketsByMatch";
 import Bets from "@/components/bets/bets";
 import { useTokenStore } from "@/store/use-bear-store";
-import { useAdminStore } from "@/store/use-admin-store";
 import BackofficeDashboard from "@/components/dashboard/dashboard";
-import MarketByMatch from "@/components/client/match/markets-by-match";
 import EditBettingMarket from "@/components/bettingmarket/edit-bettingMarket";
+import Transations from "@/components/transations/transtations";
+import Payments from "@/components/payments/payments";
+import NewPayment from "@/components/payments/new-payment";
+import EditPayment from "@/components/payments/edit-payment";
+import { useAdminStore } from "@/store/use-admin-store";
+import App from "@/App";
+
+import Settings from "@/components/settings/settings";
+import AdminSettings from "@/components/settings/admin";
+import Customers from "@/components/customers/customers";
+import SingleCustomerView from "@/components/customers/single-customer-view";
+import RecentMatches from "@/components/matches/recent-matches";
+import NextMatches from "@/components/matches/next-matches";
 
 export default function Router() {
-  const {
-    getAppData,
-    addMatch,
-    updateMatch,
-    removeMatch,
-    addBettingMarket,
-    removeBettingMarket,
-  } = useAppStore();
-  const { getAdminAppData } = useAdminStore();
-  const { token, user } = useTokenStore();
-
-  const socket = new WebSocket(`/app?userId=${user?.id}`);
+  const { user, token } = useTokenStore();
+  const { getAppData, connect } = useAdminStore();
 
   useEffect(() => {
-    socket.onopen = () => {
-      socket.send("connected");
-    };
-    socket.onmessage = (ev) => {
-      const { type, payload } = JSON.parse(ev.data);
+    if (!user?.id || !token) return;
+    getAppData({ userId: String(user?.id), token });
 
-      if (type === "newmatch") {
-        console.log(type);
-        // console.log(payload);
-        addMatch(JSON.parse(payload));
-      } else if (type === "editmatch") {
-        console.log(type);
-        // console.log((payload));
-        updateMatch(JSON.parse(payload));
-      } else if (type === "removematch") {
-        // console.log(payload);
-        removeMatch(JSON.parse(payload));
-      } else if (type === "newbettingmarket") {
-        // console.log(payload);
-        addBettingMarket(JSON.parse(payload));
-      } else if (type === "deleteBettingMarket") {
-        removeBettingMarket(JSON.parse(payload));
-      }
-    };
-    return () => {
-      socket.close();
-    };
+    connect(user.id);
   }, []);
-  useEffect(() => {
-    getAppData();
-    if (token) {
-      getAdminAppData(token);
-    }
-  }, []);
+
   return (
     <Routes>
       <Route element={<ProtectRoute />}>
         <Route path="/" Component={App} />
-        <Route path="/matches/:matchId" Component={MarketByMatch} />
 
         {/* BackOffice Dashboard */}
-        <Route path="/backoffice/dashboard" Component={BackofficeDashboard} />
+        <Route path="/dashboard" Component={BackofficeDashboard} />
+        <Route path="/customers" Component={Customers} />
+        <Route path="/customers/:userId" Component={SingleCustomerView} />
+
+        <Route path="/payments" Component={Payments} />
+        <Route path="/payments/new" Component={NewPayment} />
+        <Route path="/payments/:paymentId" Component={EditPayment} />
+
+        <Route path="/transations" Component={Transations} />
 
         {/* League */}
-        <Route path="/backoffice/leagues" Component={Leagues} />
-        <Route path="/backoffice/leagues/new" Component={NewLeague} />
-        <Route path="/backoffice/leagues/:id" Component={EditLeague} />
+        <Route path="/leagues" Component={Leagues} />
+        <Route path="/leagues/new" Component={NewLeague} />
+        <Route path="/leagues/:id" Component={EditLeague} />
+
+        {/* Running League */}
+        {/* <Route path="/runningleagues" Component={RunningLeague} />
+        <Route path="/runningleagues/new" Component={NewRunningLeague} />
+        <Route path="/runningleagues/:id" Component={EidtRunningLeague} /> */}
 
         {/* Country */}
-        <Route path="/backoffice/countries" Component={Countries} />
-        <Route path="/backoffice/countries/new" Component={NewCountry} />
-        <Route path="/backoffice/countries/:id" Component={EditCountry} />
+        <Route path="/countries" Component={Countries} />
+        <Route path="/countries/new" Component={NewCountry} />
+        <Route path="/countries/:id" Component={EditCountry} />
 
         {/* Teams */}
-        <Route path="/backoffice/teams" Component={Teams} />
-        <Route path="/backoffice/teams/new" Component={NewTeam} />
-        <Route path="/backoffice/teams/:id" Component={EditTeam} />
+        <Route path="/teams" Component={Teams} />
+        <Route path="/teams/new" Component={NewTeam} />
+        <Route path="/teams/:teamId" Component={EditTeam} />
 
         {/* Matches */}
-        <Route path="/backoffice/matches" Component={Matches} />
-        <Route path="/backoffice/matches/new" Component={NewMatch} />
-        <Route path="/backoffice/matches/:id" Component={EditMatch} />
+        <Route path="/matches" Component={Matches} />
+        <Route path="/matches/recent" Component={RecentMatches} />
+        <Route path="/matches/next" Component={NextMatches} />
+        <Route path="/matches/new" Component={NewMatch} />
+        <Route path="/matches/:id" Component={EditMatch} />
 
         {/* Betting Market */}
+        <Route path="/bettingMarkets" Component={BettingMarketsByMatch} />
         <Route
-          path="/backoffice/bettingMarkets"
-          Component={BettingMarketsByMatch}
-        />
-        <Route
-          path="/backoffice/bettingMarkets/:matchId"
+          path="/bettingMarkets/:publishMatchId"
           Component={BettingMarket}
         />
 
         <Route
-          path="/backoffice/bettingMarket/:matchId/newbettingmarket"
+          path="/bettingMarket/:publishMatchId/newbettingmarket"
           Component={NewBettingMarket}
         />
         <Route
-          path="/backoffice/bettingMarket/edit/:bettingMarketId"
+          path="/bettingMarket/edit/:bettingMarketId"
           Component={EditBettingMarket}
         />
 
         {/* Odds */}
-        <Route
-          path="/backoffice/odds/:matchId/:bettingMarketId"
-          Component={Odds}
-        />
-        <Route
-          path="/backoffice/odds/:matchId/:bettingMarketId/new"
-          Component={NewOdd}
-        />
-        <Route path="/backoffice/odds/:oddId" Component={EditOdd} />
+        <Route path="/odds/:matchId/:bettingMarketId" Component={Odds} />
+        <Route path="/odds/:matchId/:bettingMarketId/new" Component={NewOdd} />
+        <Route path="/odds/:oddId" Component={EditOdd} />
 
         {/* Bets */}
 
-        <Route path="/backoffice/bets" Component={Bets} />
+        <Route path="/bets" Component={Bets} />
+
+        <Route path="/settings" Component={Settings} />
+        <Route path="/settings/admin" Component={AdminSettings} />
       </Route>
 
       <Route path="/login" Component={Login} />

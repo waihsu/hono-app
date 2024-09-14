@@ -16,7 +16,7 @@ export default function NewTeam() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/teams`}
+            to={`/teams`}
           >
             <ArrowLeft /> Back
           </Link>
@@ -24,7 +24,7 @@ export default function NewTeam() {
         description="create a Team"
         name="Create Team"
       />
-      <div className=" max-w-lg">
+      <div className="container">
         <NewTeamForm />
       </div>
     </BackofficeLayout>

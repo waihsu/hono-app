@@ -5,12 +5,12 @@ import Heading from "../Heading";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
 import NewOddForm from "./new-odd-form";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function NewOdd() {
   const { bettingMarketId } = useParams();
-  const { teams } = useAppStore();
+  const { teams } = useAdminStore();
   const navigate = useNavigate();
   if (!bettingMarketId) return null;
   const searchParams = new URLSearchParams(location.search);

@@ -7,9 +7,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { SignOut } from "./signout-button";
-import { User } from "@/store/use-bear-store";
+import { User } from "@/types/types";
 
 export function DropdownProfile({ user }: { user: User }) {
+  // console.log(user);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,11 +22,13 @@ export function DropdownProfile({ user }: { user: User }) {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        <div>
+        <div className=" flex items-center  gap-2">
           <ThemeToggle />
         </div>
         <DropdownMenuSeparator />
-        <SignOut />
+        <div>
+          <SignOut />
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

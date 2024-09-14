@@ -14,32 +14,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
+
+import { League } from "@/types/types";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
+  id: z.string(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
 });
 
-export default function NewLeageForm() {
-  const { addLeague } = useAppStore();
+export default function EditLeagueForm({ league }: { league: League }) {
+  const { updateLeague } = useAdminStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      id: league.id,
+      name: league.name,
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    const resp = await fetch("/api/leagues", {
-      method: "POST",
+    const resp = await fetch(`/api/leagues/${league.id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Bearer: token,
@@ -53,9 +57,9 @@ export default function NewLeageForm() {
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { newLeague } = data;
-      console.log(newLeague);
-      addLeague(newLeague);
+      const { updatedLeague } = data;
+      console.log(updatedLeague);
+      updateLeague(updatedLeague);
       toast({ title: "successful" });
     }
   }
@@ -77,7 +81,7 @@ export default function NewLeageForm() {
           )}
         />
         <Button disabled={loading} type="submit">
-          {loading ? "loading..." : "Create"}
+          {loading ? "loading..." : "Update"}
         </Button>
       </form>
     </Form>

@@ -19,7 +19,7 @@ export function DatePickerWithRange({
 }: {
   className?: string;
   date: DateRange | undefined;
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+  setDate: (newDate: DateRange | undefined) => void;
 }) {
   return (
     <div className={cn("grid gap-2", className)}>

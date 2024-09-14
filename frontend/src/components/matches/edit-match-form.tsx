@@ -2,11 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import SelectCountryLeague from "../select-country-league";
 import { DateTimePicker } from "../date-time-picker";
 import { Label } from "../ui/label";
 import { Match } from "@/types/types";
+import { Input } from "../ui/input";
 
 // const formSchema = z.object({
 //   home_team_id: z.string().min(2, {
@@ -18,8 +19,14 @@ import { Match } from "@/types/types";
 //   match_status: z.string()
 // });
 
-export default function EditMatchForm({ match }: { match: Match }) {
-  const { teams } = useAppStore();
+export default function EditMatchForm({
+  match,
+  ws,
+}: {
+  match: Match;
+  ws: WebSocket;
+}) {
+  const { teams } = useAdminStore();
   const { token } = useTokenStore();
   const [matchDate, setMatchDate] = useState<Date>(new Date(match.match_date));
 
@@ -27,9 +34,14 @@ export default function EditMatchForm({ match }: { match: Match }) {
 
   const [homeTeamId, setHomeTeamId] = useState<string>(match.home_team_id);
   const [awayTeamId, setAwayTeamId] = useState<string>(match.away_team_id);
+  const [hometTeamScore, setHomeTeamScore] = useState<number>(
+    match.home_team_score
+  );
+  const [awayTeamScore, setAwayTeamScore] = useState<number>(
+    match.away_team_scroe
+  );
   // const [matchStatus, setMatchStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const socket = new WebSocket(`/api/matches?type=editmatch`);
 
   // 2. Define a submit handler.
   async function onSubmit() {
@@ -46,6 +58,8 @@ export default function EditMatchForm({ match }: { match: Match }) {
         awayTeamId,
         matchDate,
         matchStatus,
+        hometTeamScore,
+        awayTeamScore,
       }),
     });
     setLoading(false);
@@ -57,11 +71,17 @@ export default function EditMatchForm({ match }: { match: Match }) {
     } else {
       const { updatedMatch } = data;
       // console.log(updatedMatch);
-      socket.send(JSON.stringify(updatedMatch));
+      ws.send(
+        JSON.stringify({
+          type: "editmatch",
+          message: updatedMatch,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }
-  console.log(matchDate);
+
   function onSeleteDate(date: Date | undefined) {
     if (!date) return;
     setMatchDate(date);
@@ -84,6 +104,24 @@ export default function EditMatchForm({ match }: { match: Match }) {
           data={teams}
           name="Away Teams"
           setValue={setAwayTeamId}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label>Home Team Score</Label>
+        <Input
+          type="number"
+          value={hometTeamScore}
+          onChange={(ev) => setHomeTeamScore(Number(ev.target.value))}
+          placeholder="Home team score"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label>Away Team Score</Label>
+        <Input
+          type="number"
+          value={awayTeamScore}
+          onChange={(ev) => setAwayTeamScore(Number(ev.target.value))}
+          placeholder="Home team score"
         />
       </div>
 

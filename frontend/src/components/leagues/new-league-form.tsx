@@ -14,36 +14,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
-
-import { useAppStore } from "@/store/use-app-store";
-import { League } from "@/types/types";
-import { toast } from "./ui/use-toast";
+import { toast } from "../ui/use-toast";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
-  id: z.string(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
 });
 
-export default function EditLeagueForm({ league }: { league: League }) {
-  const { updateLeague } = useAppStore();
+export default function NewLeageForm() {
+  const { addLeague } = useAdminStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: league.id,
-      name: league.name,
+      name: "",
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    const resp = await fetch(`/api/leagues/${league.id}`, {
-      method: "PUT",
+    const resp = await fetch("/api/leagues", {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Bearer: token,
@@ -57,9 +53,9 @@ export default function EditLeagueForm({ league }: { league: League }) {
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { updatedLeague } = data;
-      console.log(updatedLeague);
-      updateLeague(updatedLeague);
+      const { newLeague } = data;
+      console.log(newLeague);
+      addLeague(newLeague);
       toast({ title: "successful" });
     }
   }
@@ -81,7 +77,7 @@ export default function EditLeagueForm({ league }: { league: League }) {
           )}
         />
         <Button disabled={loading} type="submit">
-          {loading ? "loading..." : "Update"}
+          {loading ? "loading..." : "Create"}
         </Button>
       </form>
     </Form>

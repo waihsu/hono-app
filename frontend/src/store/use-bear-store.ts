@@ -6,20 +6,24 @@ export interface User {
   username: string;
   email: string;
   balance: number;
-  account_status: "string";
+  account_status: "SUSPENDED" | "ACTIVE" | "BAN";
+  user_role: "ADMIN" | "SUPERADMIN" | "USER";
 }
 
 interface MyState {
+  init: boolean;
   token: string;
   user: User | null;
   addToken: (jwt: string) => void;
   setUser: (user: User | null) => void;
+  setInit: (value: boolean) => void;
 }
 
 export const useTokenStore = create<MyState>()(
   persist(
     (set) => ({
-      token: "",
+      init: false,
+      token: localStorage.getItem("token") || "",
       user: null,
       addToken: (jwt: string) => {
         set({ token: jwt });
@@ -27,10 +31,14 @@ export const useTokenStore = create<MyState>()(
       setUser: (user: User | null) => {
         set({ user: user });
       },
+      setInit: (value: boolean) => {
+        set({ init: value });
+      },
     }),
     {
       name: "food-storage", // name of item in the storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // (optional) by default the 'localStorage' is used
+      // partialize: (state) => ({ token: state.token }),
     }
   )
 );

@@ -9,32 +9,6 @@ const { websocket, upgradeWebSocket } = createBunWebSocket();
 
 const matches = new Hono();
 
-const topic = "custom1";
-matches.use(
-  "/",
-  upgradeWebSocket((_) => ({
-    onOpen(_, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.subscribe(topic);
-      console.log(
-        `WebSocket server opened Match and subscribed to topic '${topic}'`
-      );
-      // rawWs.publish(topic, "hello");
-    },
-    onMessage(evt, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.publish(topic, "Match");
-    },
-    onClose(_, ws) {
-      const rawWs = ws.raw as ServerWebSocket;
-      rawWs.unsubscribe(topic);
-      console.log(
-        `WebSocket server closed and unsubscribed from topic '${topic}'`
-      );
-    },
-  }))
-);
-
 matches.post("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
@@ -43,6 +17,7 @@ matches.post("/", async (c) => {
 
     const { role } = await verify(token, process.env.JWT_SECRET!);
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
+
     const {
       homeTeamId,
       awayTeamId,
@@ -64,7 +39,7 @@ matches.post("/", async (c) => {
     return c.json({ newMatch });
   } catch (err) {
     console.log(err);
-    return c.json({ messg: "Error" }, 403);
+    return c.json({ messg: "Error" }, 405);
   }
 });
 
@@ -82,12 +57,18 @@ matches.put("/:id", async (c) => {
       awayTeamId,
       matchDate,
       matchStatus,
+      hometTeamScore,
+      awayTeamScore,
     }: {
       homeTeamId: string;
       awayTeamId: string;
       matchDate: string;
       matchStatus: Match_Status;
+      hometTeamScore: number;
+      awayTeamScore: number;
     } = await c.req.json();
+    if (!Number(hometTeamScore) || !Number(awayTeamScore))
+      return c.json({ messg: "Team Score must be number" });
     const updatedMatch = await prisma.matches.update({
       where: { id },
       data: {
@@ -95,6 +76,8 @@ matches.put("/:id", async (c) => {
         away_team_id: awayTeamId,
         match_date: matchDate,
         match_status: matchStatus,
+        home_team_score: hometTeamScore,
+        away_team_scroe: awayTeamScore,
       },
     });
     return c.json({ updatedMatch });

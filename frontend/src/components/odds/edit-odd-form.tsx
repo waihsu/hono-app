@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useTokenStore } from "@/store/use-bear-store";
 import { toast } from "../ui/use-toast";
-import { useAppStore } from "@/store/use-app-store";
 import SelectCountryLeague from "../select-country-league";
 import { Odd } from "@/types/types";
+import { useAdminStore } from "@/store/use-admin-store";
 
 const formSchema = z.object({
   id: z.string(),
@@ -30,15 +30,16 @@ const formSchema = z.object({
 export default function EditOddForm({
   odd,
   data,
+  ws,
 }: {
   odd: Odd;
   data: { id: string; name: string }[];
+  ws: WebSocket;
 }) {
-  const { addOdd } = useAppStore();
   const { token } = useTokenStore();
   const [loading, setLoading] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState("");
-
+  const [selectedTeamId, setSelectedTeamId] = useState(odd.team_id);
+  const { updateOdd } = useAdminStore();
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,12 +71,19 @@ export default function EditOddForm({
       console.log(messg);
       toast({ title: messg, variant: "destructive" });
     } else {
-      const { newOdd } = data;
-      console.log(newOdd);
-      addOdd(newOdd);
+      const { updatedOdd } = data;
+      updateOdd(updatedOdd);
+      ws.send(
+        JSON.stringify({
+          type: "editodd",
+          message: updatedOdd,
+          sendTo: "client",
+        })
+      );
       toast({ title: "successful" });
     }
   }
+  console.log(odd);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -109,7 +117,7 @@ export default function EditOddForm({
         />
         <div>
           <SelectCountryLeague
-            value={odd.team_id}
+            value={selectedTeamId}
             data={data}
             name="Team"
             setValue={(value: string) => setSelectedTeamId(value)}

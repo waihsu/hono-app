@@ -1,14 +1,18 @@
-import React from "react";
-import { Card, CardHeader, CardTitle } from "../ui/card";
-import { Flag } from "lucide-react";
+import { Card } from "../ui/card";
 
-export default function CountryCard({ name }: { name: string }) {
+export default function CountryCard({
+  name,
+  image_url,
+}: {
+  name: string;
+  image_url: string;
+}) {
   return (
-    <Card>
-      <CardHeader>
-        <Flag className=" mx-auto" size={30} />
-        <CardTitle className=" text-center">{name}</CardTitle>
-      </CardHeader>
+    <Card className="h-32 flex flex-col justify-center items-center">
+      <div>
+        <img src={image_url} alt="" className="w-7 h-7  object-center" />
+      </div>
+      <p className=" text-center">{name}</p>
     </Card>
   );
 }

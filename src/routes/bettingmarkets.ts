@@ -15,15 +15,15 @@ bettingMarkets.post("/", async (c) => {
     if (role === "USER") return c.json({ messg: "You are not admin" }, 401);
     const {
       market_type,
-      match_id,
+      publish_match_id,
     }: {
-      match_id: string;
       market_type: string;
+      publish_match_id: string;
     } = await c.req.json();
-    if (!market_type || !match_id)
+    if (!market_type || !publish_match_id)
       return Response.json({ messg: "Form not valid" }, { status: 403 });
     const newBettingMarket = await prisma.bettingMarkets.create({
-      data: { market_type, match_id },
+      data: { market_type, publish_match_id },
     });
     return c.json({ newBettingMarket });
   } catch (err) {
@@ -32,7 +32,7 @@ bettingMarkets.post("/", async (c) => {
   }
 });
 
-bettingMarkets.put("/:id", async (c) => {
+bettingMarkets.put("/", async (c) => {
   try {
     const token = c.req.header("Bearer");
 
@@ -44,19 +44,17 @@ bettingMarkets.put("/:id", async (c) => {
     const {
       id,
       market_type,
-      match_id,
       market_status,
     }: {
       id: string;
-      match_id: string;
       market_type: string;
       market_status: $Enums.MarketStatus;
     } = await c.req.json();
-    const updatedCountry = await prisma.bettingMarkets.update({
+    const updatedBettingMarket = await prisma.bettingMarkets.update({
       where: { id },
-      data: { market_status, market_type, match_id },
+      data: { market_status, market_type },
     });
-    return c.json({ updatedCountry });
+    return c.json({ updatedBettingMarket });
   } catch (err) {
     console.log(err);
     return Response.json({ messg: "Error" }, { status: 405 });

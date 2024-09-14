@@ -1,18 +1,29 @@
 import AdminMobileNav from "./admin-mobile-nav";
-import NavLink from "./nav-link";
 import { DropdownProfile } from "./DropDownProfile";
-import { useTokenStore } from "@/store/use-bear-store";
+import { User } from "@/store/use-bear-store";
 import { Link } from "react-router-dom";
+import { LucideProps } from "lucide-react";
+import NavLink from "./nav-link";
 
-export default function AdminNav() {
-  const { user } = useTokenStore();
+interface AdminNavProps {
+  sidebarNav: {
+    title: string;
+    href: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }[];
+  user: User;
+}
+
+export default function AdminNav({ sidebarNav, user }: AdminNavProps) {
   return (
     <div className=" min-w-full flex justify-between items-center  z-20 shadow-lg py-4 px-8 sticky top-0 backdrop-blur-sm bg-background/90  supports-[backdrop-filter]:bg-background/10">
       <div className="lg:hidden">
-        <AdminMobileNav name="Backoffice" />
+        <AdminMobileNav name="Football" sidebarNav={sidebarNav} />
       </div>
       <div>
-        <NavLink />
+        <NavLink sidebarNav={sidebarNav} />
       </div>
 
       <div className="flex gap-2 items-center">

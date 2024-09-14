@@ -17,7 +17,7 @@ export default function NewMatch() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/matches`}
+            to={`/matches`}
           >
             <ArrowLeft /> Back
           </Link>

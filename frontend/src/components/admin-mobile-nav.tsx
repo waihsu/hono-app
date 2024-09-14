@@ -1,75 +1,33 @@
-"use client";
-
 import * as React from "react";
 
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { cn } from "@/lib/utils";
 
-import {
-  BadgeDollarSign,
-  // BadgeDollarSign,
-  Flag,
-  LayoutDashboard,
-  LucideIcon,
-  Receipt,
-  // Settings,
-  Shield,
-  ShieldHalf,
-  Swords,
-} from "lucide-react";
+import { LucideIcon, LucideProps } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Link, useLocation } from "react-router-dom";
 
-export const sidebarNav = [
-  {
-    title: "Dashboard",
-    href: `/backoffice/dashboard`,
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Bets",
-    href: `/backoffice/bets`,
-    icon: Receipt,
-  },
-  {
-    title: "Leagues",
-    href: `/backoffice/leagues`,
-    icon: ShieldHalf,
-  },
-  {
-    title: "Countries",
-    href: `/backoffice/countries`,
-    icon: Flag,
-  },
-  {
-    title: "Teams",
-    href: `/backoffice/teams`,
-    icon: Shield,
-  },
-  {
-    title: "Matches",
-    href: `/backoffice/matches`,
-    icon: Swords,
-  },
-  {
-    title: "Betting Market",
-    href: `/backoffice/bettingMarkets`,
-    icon: BadgeDollarSign,
-  },
-  // {
-  //   title: "Settings",
-  //   href: `/backoffice/settings`,
-  //   icon: Settings,
-  // },
-];
-export default function AdminMobileNav({ name }: { name: string }) {
+export default function AdminMobileNav({
+  name,
+  sidebarNav,
+}: {
+  name: string;
+  sidebarNav: {
+    title: string;
+    href: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }[];
+}) {
   const location = useLocation();
   // console.log(location.pathname);
   const [open, setOpen] = React.useState(false);
@@ -115,8 +73,8 @@ export default function AdminMobileNav({ name }: { name: string }) {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <SheetTitle>{name}</SheetTitle>
-        {/* <SheetDescription>select shop</SheetDescription> */}
+        <SheetTitle className="text-xl sm:text-3xl">{name}</SheetTitle>
+        <SheetDescription>backoffice</SheetDescription>
 
         {/* <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6 "> */}
         <div className="flex flex-col space-y-3 ml-4 mt-4">

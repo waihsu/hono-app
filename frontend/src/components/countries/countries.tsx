@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { useAppStore } from "@/store/use-app-store";
+import { useAdminStore } from "@/store/use-admin-store";
 import CountryCard from "./country-card";
 
 export default function Countries() {
-  const { countries } = useAppStore();
-  console.log(countries);
+  const { countries } = useAdminStore();
+  // console.log(countries);
   return (
     <BackofficeLayout>
       <Heading
@@ -19,7 +19,7 @@ export default function Countries() {
               buttonVariants({ variant: "default" }),
               "flex items-center gap-x-2"
             )}
-            to={`/backoffice/countries/new`}
+            to={`/countries/new`}
           >
             <PlusCircle /> New Country
           </Link>
@@ -30,8 +30,8 @@ export default function Countries() {
       <div className=" grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
         {countries &&
           countries.map((item) => (
-            <Link to={`/backoffice/countries/${item.id}`} key={item.id}>
-              <CountryCard name={item.name} />
+            <Link to={`/countries/${item.id}`} key={item.id}>
+              <CountryCard name={item.name} image_url={item.flag} />
             </Link>
           ))}
       </div>
