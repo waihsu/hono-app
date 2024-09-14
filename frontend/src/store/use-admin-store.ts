@@ -15,7 +15,6 @@ import {
 } from "@/types/types";
 import { create } from "zustand";
 import { toast } from "@/components/ui/use-toast";
-import { config } from "@/config/config";
 
 interface AdminState {
   ws: WebSocket | null;
@@ -119,9 +118,7 @@ export const useAdminStore = create<AdminState>((set) => ({
   onlineUserids: [],
 
   connect: (userId: string) => {
-    const ws = new WebSocket(
-      `${config.api_base_url}/ws?type=admin&userId=${userId}`
-    );
+    const ws = new WebSocket(`/ws?type=admin&userId=${userId}`);
 
     ws.onopen = () => {
       console.log("Connected to WebSocket");
@@ -184,7 +181,7 @@ export const useAdminStore = create<AdminState>((set) => ({
   },
 
   getAppData: async ({ token, userId }: { userId: string; token: string }) => {
-    const resp = await fetch(`${config.api_base_url}/api/admin/${userId}`, {
+    const resp = await fetch(`/api/admin/${userId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json", Bearer: token },
     });
